@@ -18,7 +18,8 @@ function App() {
         <div>
           <h1>Get started with Student Assignment Tracker</h1>
           <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+         CPAN 314 - Project Development I - Project
+         By Group 8 - Bolos Bolos, Ibrahim Hagi, Tsering Lama, Dustin Nguyen, Kaynaan Nuur, and Brandon Pagani Lozano
           </p>
         </div>
         <button
