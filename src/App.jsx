@@ -62,7 +62,7 @@ function App() {
           <p>Join the Vite community</p>
           <ul>
             <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
+              <a href="https://github.com/BolosBolosGitHub416/StudentAssignmentTracker" target="_blank">
                 <svg
                   className="button-icon"
                   role="presentation"
