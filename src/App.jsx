@@ -18,8 +18,8 @@ function App() {
         <div>
           <h1>Get started with Student Assignment Tracker</h1>
           <p>
-         CPAN 314 - Project Development I - Project
-         By Group 8 - Bolos Bolos, Ibrahim Hagi, Tsering Lama, Dustin Nguyen, Kaynaan Nuur, and Brandon Pagani Lozano
+         CPAN 314 - Project Development I -
+          Project By Group 8 - Bolos Bolos, Ibrahim Hagi, Tsering Lama, Dustin Nguyen, Kaynaan Nuur, and Brandon Pagani Lozano
           </p>
         </div>
         <button
@@ -62,7 +62,7 @@ function App() {
           <p>Join the Vite community</p>
           <ul>
             <li>
-              <a href="https://github.com/BolosBolosGitHub416/StudentAssignmentTracker" target="_blank">
+              <a href="https://github.com/vitejs/vite" target="_blank">
                 <svg
                   className="button-icon"
                   role="presentation"
