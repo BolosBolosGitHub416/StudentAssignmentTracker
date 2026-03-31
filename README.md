@@ -1,4 +1,6 @@
-# React + Vite
+# Student Assignment Tracker
+CPAN 314 - Project Development I - Project - By Group 8 - Bolos Bolos, Ibrahim Hagi, Tsering Lama, Dustin Nguyen, Kaynaan Nuur, and Brandon Pagani Lozano
+# React + Vite 
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
