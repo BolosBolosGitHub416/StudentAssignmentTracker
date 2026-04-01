@@ -1,36 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [assignments, setAssignments] = useState([]);
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+
+  // Load saved data
+  useEffect(() => {
+    const saved = localStorage.getItem("assignments");
+    if (saved) setAssignments(JSON.parse(saved));
+  }, []);
+
+  // Save data
+  useEffect(() => {
+    localStorage.setItem("assignments", JSON.stringify(assignments));
+  }, [assignments]);
+
+  const addAssignment = () => {
+    if (!title || !date) return;
+
+    const newAssignment = { title, date };
+    setAssignments([...assignments, newAssignment]);
+
+    setTitle("");
+    setDate("");
+  };
+
+  const deleteAssignment = (index) => {
+    const updated = assignments.filter((_, i) => i !== index);
+    setAssignments(updated);
+  };
+
+  const checkPriority = (date) => {
+    const today = new Date();
+    const due = new Date(date);
+    const diff = (due - today) / (1000 * 60 * 60 * 24);
+
+    if (diff <= 2) return "HIGH";
+    if (diff <= 5) return "MEDIUM";
+    return "LOW";
+  };
+
+  const getPriorityStyle = (priority) => {
+    if (priority === "HIGH") return { color: "#e53935" }; // red
+    if (priority === "MEDIUM") return { color: "#fb8c00" }; // orange
+    return { color: "#43a047" }; // green
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started with Student Assignment Tracker</h1>
-          <p>
-         CPAN 314 - Project Development I -
-          Project By Group 8 - Bolos Bolos, Ibrahim Hagi, Tsering Lama, Dustin Nguyen, Kaynaan Nuur, and Brandon Pagani Lozano
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="container">
+      <h1>Student Assignment Tracker</h1>
 
-      <div className="ticks"></div>
+      {/* Form */}
+      <div className="form">
+        <input
+          type="text"
+          placeholder="Assignment Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
       <section id="next-steps">
         <div id="docs">
@@ -113,10 +142,43 @@ function App() {
         </div>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <button onClick={addAssignment}>Add Assignment</button>
+      </div>
+
+      {/* List */}
+      <div className="list">
+        <h2>📋 Your Assignments</h2>
+
+        {assignments.length === 0 ? (
+          <p>No assignments yet.</p>
+        ) : (
+          assignments.map((a, index) => {
+            const priority = checkPriority(a.date);
+
+            return (
+              <div key={index} className="card">
+                <h3>{a.title}</h3>
+                <p>Due: {a.date}</p>
+
+                <p style={getPriorityStyle(priority)}>
+                  {priority === "HIGH" && "⚠️ High Priority"}
+                  {priority === "MEDIUM" && "⚡ Medium Priority"}
+                  {priority === "LOW" && "✅ Low Priority"}
+                </p>
+
+                <button
+                  className="deleteBtn"
+                  onClick={() => deleteAssignment(index)}
+                >
+                  Delete
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
