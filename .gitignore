@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Optional .env file for environment variables
-.env
+server/.env
