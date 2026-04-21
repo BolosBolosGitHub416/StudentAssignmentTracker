@@ -1,35 +1,80 @@
 // server/index.js
-// Import necessary modules, and middleware
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import logger from './middleware/logger.js';
-import authRouter from './routers/auth.js';
-import assignmentRouter from './routers/assignments.js';
-import userRouter from './routers/users.js';
-import { notFound, errorHandler } from './middleware/errorHandler.js';
 
-dotenv.config(); // Load environment variables from .env file
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import logger from "./middleware/logger.js";
 
-const app = express(); // Create an Express application
+import authRouter from "./routers/auth.js";
+import assignmentRouter from "./routers/assignments.js";
+import userRouter from "./routers/users.js";
+import announcementRoutes from "./routers/announcements.js";
 
-app.use(cors()); // Enable CORS for all routes (configure as needed for production)
-app.use(express.json()); // Middleware to parse JSON request bodies
-app.use(logger); // Custom middleware to log request details
-// Health check endpoint to verify the server is running
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Student Assignment Tracker API' });
+import { notFound, errorHandler } from "./middleware/errorHandler.js";
+
+import { createServer } from "http";
+import { Server } from "socket.io";
+
+dotenv.config();
+
+const app = express();
+
+// Create HTTP server for Socket.IO
+const server = createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
 });
 
-app.use('/api/auth', authRouter); // Routes for authentication (register, login, profile)
-app.use('/api/assignments', assignmentRouter); // Routes for assignment management (CRUD operations)
-app.use('/api/users', userRouter); // Routes for user management (admin-only access)
+app.use(cors());
+app.use(express.json());
+app.use(logger);
 
-app.use(notFound); // Middleware to handle 404 Not Found errors
-app.use(errorHandler); // Middleware to handle general errors and send appropriate responses
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", service: "Student Assignment Tracker API" });
+});
 
-const port = process.env.PORT || 5000; // Use PORT from environment variables or default to 5000
-// Start the server and listen on the specified port
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+// Existing routes
+app.use("/api/auth", authRouter);
+app.use("/api/assignments", assignmentRouter);
+app.use("/api/users", userRouter);
+
+// New announcements route
+app.use("/api/announcements", announcementRoutes);
+
+// Error handlers
+app.use(notFound);
+app.use(errorHandler);
+
+// Socket connection
+io.on("connection", (socket) => {
+  console.log("User connected");
+
+  // join course room
+  socket.on("joinCourse", (course) => {
+    socket.join(course);
+  });
+
+  // receive message and broadcast
+  socket.on("courseMessage", (data) => {
+    io.to(data.course).emit("courseMessage", data.message);
+  });
+
+  // example notification
+  setTimeout(() => {
+    socket.emit("notification", "New assignment announcement posted!");
+  }, 5000);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
+
+const port = process.env.PORT || 8001;
+
+server.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });

@@ -1,26 +1,38 @@
 // server/controllers/authController.js
 // Handles user registration, login, and profile retrieval
 // Uses bcrypt for password hashing and JWT for authentication
-import bcrypt from 'bcryptjs';
-import { generateToken } from '../middleware/auth.js'; // Utility function to generate JWT tokens
-import { users } from '../models/users.js'; // In-memory user store (replace with DB in production)
+
+import bcrypt from "bcryptjs";
+import { generateToken } from "../middleware/auth.js"; // JWT generator
+import { users } from "../models/users.js"; // In-memory user store
+import sendEmail from "../utils/sendEmail.js"; // Email utility
+
 // Helper function to find a user by email
-const findUserByEmail = (email) => users.find((user) => user.email === email);
-// Registration controller to create a new user and return a JWT token  
+const findUserByEmail = (email) =>
+  users.find((user) => user.email === email);
+
+
+// REGISTER USER
 export const register = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, role = 'student' } = req.body; 
+    const { email, password, firstName, lastName, role = "student" } = req.body;
+
     // Validate required fields
     if (!email || !password || !firstName || !lastName) {
-      return res.status(400).json({ error: 'Missing required registration fields' });
+      return res
+        .status(400)
+        .json({ error: "Missing required registration fields" });
     }
-    // Check if the email is already registered
+
+    // Check if email already exists
     if (findUserByEmail(email)) {
-      return res.status(409).json({ error: 'Email already registered' });
+      return res.status(409).json({ error: "Email already registered" });
     }
-    // Hash the password and create a new user
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    // Create a new user object and add it to the in-memory store  
+
+    // Create user object
     const newUser = {
       _id: `${Date.now()}`,
       email,
@@ -30,41 +42,70 @@ export const register = async (req, res, next) => {
       role,
     };
 
-    users.push(newUser); // Add the new user to the in-memory store
-    const token = generateToken(newUser); // Generate a JWT token for the new user
-    // Return the token and user information (excluding the password) in the response
-    res.status(201).json({ token, user: { ...newUser, password: undefined } });
-  } catch (error) { // Handle any errors that occur during registration
-    next(error);
-  }
-};
-// Login controller to authenticate users and return a JWT token
-export const login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body; // Validate required fields
-    // Check if the email and password are provided in the request body
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-    // Find the user by email in the in-memory store and verify the password
-    const existingUser = findUserByEmail(email); // Find the user by email in the in-memory store
-    if (!existingUser) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-    // Compare the provided password with the stored hashed password using bcrypt
-    const passwordMatches = await bcrypt.compare(password, existingUser.password);
-    if (!passwordMatches) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-    // If authentication is successful, generate a JWT token and return it along with user
-    // information (excluding the password)
-    const token = generateToken(existingUser);
-    res.json({ token, user: { ...existingUser, password: undefined } });
+    // Save user
+    users.push(newUser);
+
+    // SEND WELCOME EMAIL
+    await sendEmail(
+      email,
+      "Welcome to Student Portal",
+      `Hello ${firstName}, your account was successfully created.`
+    );
+
+    // Generate JWT
+    const token = generateToken(newUser);
+
+    // Return response
+    res.status(201).json({
+      token,
+      user: { ...newUser, password: undefined },
+    });
   } catch (error) {
     next(error);
   }
 };
-// Profile controller to return the authenticated user's profile information
+
+
+// LOGIN USER
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    const existingUser = findUserByEmail(email);
+
+    if (!existingUser) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Compare password
+    const passwordMatches = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!passwordMatches) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Generate token
+    const token = generateToken(existingUser);
+
+    res.json({
+      token,
+      user: { ...existingUser, password: undefined },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// USER PROFILE
 export const profile = (req, res) => {
   const { password, ...user } = req.user;
   res.json({ user });

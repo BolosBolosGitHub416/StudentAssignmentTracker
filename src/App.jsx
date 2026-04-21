@@ -1,10 +1,24 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import Announcements from "./Announcements";
+import Chat from "./Chat";
+import { io } from "socket.io-client";
 
 function App() {
   const [assignments, setAssignments] = useState([]);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
+  const [notification, setNotification] = useState("");
+
+  useEffect(() => {
+  const socket = io("http://localhost:8001");
+
+  socket.on("notification", (msg) => {
+    setNotification(msg);
+  });
+
+  return () => socket.disconnect();
+}, []);
 
   // Load saved data
   useEffect(() => {
@@ -43,14 +57,23 @@ function App() {
   };
 
   const getPriorityStyle = (priority) => {
-    if (priority === "HIGH") return { color: "#e53935" }; // red
-    if (priority === "MEDIUM") return { color: "#fb8c00" }; // orange
-    return { color: "#43a047" }; // green
+    if (priority === "HIGH") return { color: "#e53935" };
+    if (priority === "MEDIUM") return { color: "#fb8c00" };
+    return { color: "#43a047" };
   };
 
   return (
     <div className="container">
       <h1>Student Assignment Tracker</h1>
+      {notification && (
+  <div className="notification">
+    🔔 {notification}
+  </div>
+)}
+
+      {/* Announcement Board */}
+      <Announcements />
+      <Chat />
 
       {/* Form */}
       <div className="form">
@@ -70,7 +93,7 @@ function App() {
         <button onClick={addAssignment}>Add Assignment</button>
       </div>
 
-      {/* List */}
+      {/* Assignment List */}
       <div className="list">
         <h2>📋 Your Assignments</h2>
 
@@ -103,7 +126,6 @@ function App() {
         )}
       </div>
     </div>
-    
   );
 }
 
