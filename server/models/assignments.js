@@ -1,14 +1,35 @@
-// server/models/assignments.js
-// In-memory data store for assignments
-// In a production application, this would be replaced with a database
-export const assignments = [ // Sample assignment for testing
-  {
-    id: '1',
-    title: 'Build assignment tracker demo',
-    description: 'Submit the first version of the student assignment tracker.',
-    studentId: 'student-1',
-    dueDate: '2026-05-01',
-    createdBy: '1',
-    status: 'assigned',
+const mongoose = require("mongoose");
+
+const assignmentSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, "Title is required"]
   },
-];
+  course: {
+    type: String,
+    required: true
+  },
+  dueDate: {
+    type: Date,
+    required: true,
+    index: true 
+  },
+  grade: {
+    type: Number,
+    min: 0,
+    max: 100
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true
+  },
+  status: {
+    type: String,
+    enum: ["pending", "completed"],
+    default: "pending"
+  }
+}, { timestamps: true });
+
+module.exports = mongoose.model("Assignment", assignmentSchema);
