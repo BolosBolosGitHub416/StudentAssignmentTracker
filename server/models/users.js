@@ -1,19 +1,28 @@
-// server/models/users.js
-// In-memory user store (replace with DB in production)
-// Pre-hash the admin password for the default admin user
-import bcrypt from 'bcryptjs';  // For hashing passwords
+const mongoose = require("mongoose");
 
-// In-memory user store (replace with DB in production)
-// Pre-hash the admin password for the default admin user
-const hashedAdminPassword = bcrypt.hashSync('AdminPass123!', 10);
-// Sample users (in a real application, this would be stored in a database)
-export const users = [
-  {
-    _id: '1',
-    email: 'admin@tracker.local',
-    password: hashedAdminPassword,
-    firstName: 'Admin',
-    lastName: 'User',
-    role: 'admin',
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "Name is required"],
+    trim: true
   },
-];
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+    unique: true,
+    lowercase: true,
+    match: [/.+\@.+\..+/, "Please enter a valid email"]
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  role: {
+    type: String,
+    enum: ["student", "admin"],
+    default: "student"
+  }
+}, { timestamps: true });
+
+module.exports = mongoose.model("User", userSchema);
