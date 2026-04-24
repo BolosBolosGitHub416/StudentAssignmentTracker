@@ -9,6 +9,8 @@ import authRouter from "./routers/auth.js";
 import assignmentRouter from "./routers/assignments.js";
 import userRouter from "./routers/users.js";
 import announcementRoutes from "./routers/announcements.js";
+import analyticsRouter from "./routers/analytics.js"; 
+
 
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
@@ -44,6 +46,8 @@ app.use("/api/users", userRouter);
 
 // New announcements route
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/analytics", analyticsRouter);
+
 
 // Error handlers
 app.use(notFound);
