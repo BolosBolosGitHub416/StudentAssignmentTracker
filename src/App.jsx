@@ -3,11 +3,14 @@ import "./App.css";
 import Announcements from "./Announcements";
 import Chat from "./Chat";
 import { io } from "socket.io-client";
+import AnalyticsDashboard from "./AnalyticsDashboard";
+
 
 function App() {
   const [assignments, setAssignments] = useState([]);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [notification, setNotification] = useState("");
 
   useEffect(() => {
@@ -74,6 +77,7 @@ function App() {
       {/* Announcement Board */}
       <Announcements />
       <Chat />
+      <AnalyticsDashboard token={token} />
 
       {/* Form */}
       <div className="form">
