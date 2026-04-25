@@ -1,36 +1,35 @@
-import { getPriority } from "../utils/priority";
-
 const AssignmentCard = ({ assignment }) => {
-  const priority = getPriority(assignment.daysLeft);
-
   const colors = {
-    CRITICAL: "#ff4d4f",
-    HIGH: "#faad14",
-    MEDIUM: "#1890ff",
+    CRITICAL: "#e53935",
+    HIGH: "#fb8c00",
+    MEDIUM: "#1976d2",
   };
+
+  const color = colors[assignment.priority] || "#999";
 
   return (
     <div
       style={{
-        border: `2px solid ${colors[priority]}`,
-        borderRadius: "12px",
-        padding: "15px",
+        border: `2px solid ${color}`,
+        borderRadius: "14px",
+        padding: "14px",
         marginBottom: "10px",
         background: "#fff",
         boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-        transition: "0.2s",
       }}
     >
-      <h4>{assignment.title}</h4>
-      <p>{assignment.course}</p>
-
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span style={{ color: colors[priority], fontWeight: "bold" }}>
-          {priority}
+        <h4>{assignment.title}</h4>
+        <span style={{ color, fontWeight: "600" }}>
+          {assignment.priority}
         </span>
-        <span>in {assignment.daysLeft}d</span>
-        <span>{assignment.progress}%</span>
       </div>
+
+      <p style={{ fontSize: "13px", color: "#666" }}>
+        {assignment.course}
+      </p>
+
+      <ProgressBar value={assignment.progress} color={color} />
     </div>
   );
 };

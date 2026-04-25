@@ -2,6 +2,10 @@
 // Analytics & Logic Dashboard
 
 import { useState, useEffect } from "react";
+import ProgressBar from "./components/ProgressBar";
+import StatCard from "./components/StatCard";
+import RiskCard from "./components/RiskCard";
+import PerformanceChart from "./components/PerformanceChart";
 
 const PRIORITY_COLORS = {
   OVERDUE:  { bg: "#fdecea", text: "#c62828", border: "#e53935" },
@@ -42,16 +46,6 @@ function GPAArc({ gpa, label }) {
         <text x="48" y="60" textAnchor="middle" fill="#9e9e9e" fontSize="10" fontFamily="Arial,sans-serif">/ 4.0</text>
       </svg>
       <span style={{ fontSize: 11, color: "#757575", letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "Arial,sans-serif" }}>{label}</span>
-    </div>
-  );
-}
-
-function StatCard({ label, value, sub, color }) {
-  return (
-    <div style={{ background: "white", borderRadius: 10, padding: "14px 16px", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", borderTop: `4px solid ${color}`, display: "flex", flexDirection: "column", gap: 3 }}>
-      <span style={{ fontSize: 10, color: "#9e9e9e", textTransform: "uppercase", letterSpacing: 0.5, fontFamily: "Arial,sans-serif" }}>{label}</span>
-      <span style={{ fontSize: 26, fontWeight: "700", color, fontFamily: "Arial,sans-serif" }}>{value}</span>
-      {sub && <span style={{ fontSize: 11, color: "#757575", fontFamily: "Arial,sans-serif" }}>{sub}</span>}
     </div>
   );
 }
@@ -152,10 +146,34 @@ export default function AnalyticsDashboard({ token }) {
           <GPAArc gpa={data.cumulativeGPA || 0} label="Cumulative GPA" />
           <div style={{ flex: 1, minWidth: 220 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10 }}>
-              <StatCard label="Total" value={data.totalAssignments} color="#1976d2" />
-              <StatCard label="Completed" value={data.completedAssignments} sub={`${completedPct}% done`} color="#43a047" />
-              <StatCard label="Pending" value={data.totalAssignments - data.completedAssignments} color="#fb8c00" />
-              <StatCard label="Courses" value={data.courses?.length || 0} color="#7b1fa2" />
+<StatCard
+  title="Total"
+  value={data.totalAssignments}
+  color="#1976d2"
+  icon="📊"
+/>
+
+<StatCard
+  title="Completed"
+  value={data.completedAssignments}
+  color="#2e7d32"
+  sub="63% done"
+  icon="✅"
+/>
+
+<StatCard
+  title="Pending"
+  value={data.pendingAssignments}
+  color="#f57c00"
+  icon="⏳"
+/>
+
+<StatCard
+  title="Courses"
+  value={data.totalCourses}
+  color="#7b1fa2"
+  icon="📚"
+/>
             </div>
           </div>
         </div>
@@ -217,10 +235,25 @@ export default function AnalyticsDashboard({ token }) {
                 {/* Grade & Prediction */}
                 <div style={{ background: "#f9f9f9", borderRadius: 10, padding: 16, border: "1px solid #e3f2fd" }}>
                   <h3 style={{ margin: "0 0 12px", color: "#333", fontSize: 14, fontWeight: 600 }}>📈 Grade & Prediction</h3>
-                  <GradeBar pct={course.gpa?.percentage || 0} label={`Current (${course.gpa?.letterGrade || "N/A"})`} />
-                  <GradeBar pct={course.prediction?.predicted || 0} label={`Predicted (${course.prediction?.predictedLetter || "N/A"})`} />
-                  <GradeBar pct={course.prediction?.bestCase || 0} label="Best Case" />
-                  <GradeBar pct={course.prediction?.worstCase || 0} label="Worst Case" />
+                  <div style={{ marginBottom: 10 }}>
+                    <p>Current ({course.gpa?.letterGrade || "N/A"})</p>
+                    <ProgressBar value={course.gpa?.percentage || 0} />
+                  </div>
+
+                  <div style={{ marginBottom: 10 }}>
+                    <p>Predicted ({course.prediction?.predictedLetter || "N/A"})</p>
+                    <ProgressBar value={course.prediction?.predicted || 0} />
+                  </div>
+
+                  <div style={{ marginBottom: 10 }}>
+                    <p>Best Case</p>
+                    <ProgressBar value={course.prediction?.bestCase || 0} />
+                  </div>
+
+                  <div style={{ marginBottom: 10 }}>
+                    <p>Worst Case</p>
+                    <ProgressBar value={course.prediction?.worstCase || 0} />
+                  </div>
                   <div style={{ marginTop: 10, padding: "8px 10px", background: "#e3f2fd", borderRadius: 6 }}>
                     <span style={{ fontSize: 12, color: "#1565c0", fontFamily: "Arial,sans-serif" }}>
                       📝 <strong>{course.prediction?.remainingWeight || 0}%</strong> of course weight remaining
