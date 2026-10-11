@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from './api';
 import { connectSocket } from './socket';
-import './dustin.css';
+import './notifications.css';
 
 const CHIP = {
   OVERDUE: { bg: '#fdecea', text: '#c62828' },
