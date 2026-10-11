@@ -1,0 +1,32 @@
+/* Styles for Analytics / Chat / Announcements / Notifications) */
+.dx-card { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: left; }
+.dx-card h2 { margin-top: 0; }
+.dx-btn { padding: 9px 16px; border: none; border-radius: 6px; cursor: pointer; background: #1976d2; color: #fff; font-weight: 700; font-size: 14px; }
+.dx-btn:hover:not(:disabled) { background: #1565c0; }
+.dx-btn:disabled { background: #9bbbe0; cursor: not-allowed; }
+.dx-btn-light { padding: 7px 12px; border: 1px solid #1976d2; border-radius: 6px; cursor: pointer; background: #fff; color: #1976d2; font-weight: 600; font-size: 13px; }
+.dx-btn-light:hover { background: #e3f2fd; }
+.dx-card button:focus-visible, .dx-card input:focus-visible, .dx-card select:focus-visible, .dx-card textarea:focus-visible { outline: 3px solid #90caf9; outline-offset: 1px; }
+.dx-muted { color: #777; font-size: 13px; }
+.dx-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.dx-input { padding: 9px; border-radius: 6px; border: 1px solid #ccc; font: inherit; font-size: 14px; }
+.dx-input-grow { flex: 1; min-width: 160px; }
+
+/* chat */
+.dx-chat-box { max-height: 220px; overflow-y: auto; margin: 10px 0; padding: 8px; background: #f9f9f9; border-radius: 8px; }
+.dx-chat-box p { margin: 0 0 6px; font-size: 14px; }
+
+/* announcements */
+.dx-announcement { border-bottom: 1px solid #eee; padding: 8px 0; }
+.dx-announcement:last-of-type { border-bottom: none; }
+.dx-announcement p { margin: 2px 0 0; font-size: 14px; }
+
+/* notifications */
+.dx-badge { display: inline-block; min-width: 20px; padding: 1px 7px; border-radius: 10px; background: #e53935; color: #fff; font-size: 12px; font-weight: 700; text-align: center; margin-left: 6px; }
+.dx-notif { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; }
+.dx-notif.unread { background: #f3f8ff; margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+.dx-notif strong { font-size: 14px; }
+.dx-notif p { margin: 2px 0; font-size: 13px; color: #555; }
+.dx-chip { display: inline-block; border-radius: 5px; padding: 1px 7px; font-size: 11px; font-weight: 700; margin-right: 6px; }
+.dx-settings { margin-top: 12px; padding: 12px; border: 1px solid #e3f2fd; border-radius: 8px; }
+.dx-settings label { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 14px; }
