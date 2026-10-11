@@ -4,14 +4,15 @@ import Announcements from "./Announcements";
 import Chat from "./Chat";
 import { io } from "socket.io-client";
 import AnalyticsDashboard from "./AnalyticsDashboard";
-
+import NotificationCenter from "./NotificationCenter";
 
 function App() {
   const [assignments, setAssignments] = useState([]);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [token, setToken] = useState(localStorage.getItem("token") || "");
-  const [notification, setNotification] = useState("");
+  const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "null"));
+  
 
   useEffect(() => {
   const socket = io("http://localhost:8001");
@@ -24,10 +25,7 @@ function App() {
 }, []);
 
   // Load saved data
-  useEffect(() => {
-    const saved = localStorage.getItem("assignments");
-    if (saved) setAssignments(JSON.parse(saved));
-  }, []);
+
 
   // Save data
   useEffect(() => {
@@ -68,15 +66,11 @@ function App() {
   return (
     <div className="container">
       <h1>Student Assignment Tracker</h1>
-      {notification && (
-  <div className="notification">
-    🔔 {notification}
-  </div>
-)}
 
       {/* Announcement Board */}
-      <Announcements />
-      <Chat />
+      <NotificationCenter token={token} />
+      <Announcements token={token} user={user} />
+      <Chat token={token} />
       <AnalyticsDashboard token={token} />
 
       {/* Form */}
