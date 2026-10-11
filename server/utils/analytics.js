@@ -83,9 +83,7 @@ export const calculateCumulativeGPA = (courses) => {
   return parseFloat((totalPoints / totalCredits).toFixed(2));
 };
 
-
 // predicts final course grade based on completed assignments and remaining ones
-
 export const predictGrade = (completedAssignments, remainingAssignments, targetGrade = 70) => {
   const gradedWeight = completedAssignments.reduce((s, a) => s + (a.weight || 0), 0);
   const remainingWeight = remainingAssignments.reduce((s, a) => s + (a.weight || 0), 0);
@@ -147,8 +145,6 @@ export const predictGrade = (completedAssignments, remainingAssignments, targetG
   };
 };
 
-
-
 // Calculates a priority score for an assignment
 export const calculatePriorityScore = (assignment) => {
   const now = new Date();
@@ -160,7 +156,7 @@ export const calculatePriorityScore = (assignment) => {
   // exponential ramp as deadline approaches
   let urgencyScore;
   if (daysUntilDue < 0) {
-    urgencyScore = 200; // Overdue 
+    urgencyScore = 200; // Overdue
   } else if (daysUntilDue <= 1) {
     urgencyScore = 100;
   } else if (daysUntilDue <= 3) {
@@ -173,7 +169,7 @@ export const calculatePriorityScore = (assignment) => {
     urgencyScore = 5;
   }
 
-  // weight component 
+  // weight component
   const weightScore = ((assignment.weight || 10) / 100) * 50;
 
   return parseFloat((urgencyScore + weightScore).toFixed(2));
@@ -206,7 +202,6 @@ export const prioritizeAssignments = (assignments) => {
     .sort((a, b) => b.priorityScore - a.priorityScore);
 };
 
-
 /**
  * risk levels
  */
@@ -219,7 +214,7 @@ export const RISK_LEVELS = {
 };
 
 /**
- * analyzes a student academic situation and returns risk alertss
+ * analyzes a student academic situation and returns risk alerts
  */
 export const detectRisks = ({
   assignments = [],
@@ -272,7 +267,7 @@ export const detectRisks = ({
       alerts.push({
         type: 'AT_RISK_COURSE',
         level: RISK_LEVELS.HIGH,
-        message: `Your grade in ${course.name || 'a course'} (${average.toFixed(1)}%) isvery  close to failing. Focus on upcomng assignments.`,
+        message: `Your grade in ${course.name || 'a course'} (${average.toFixed(1)}%) is very close to failing. Focus on upcoming assignments.`,
         course: course.name,
       });
     }
@@ -284,7 +279,7 @@ export const detectRisks = ({
     alerts.push({
       type: 'GPA_BELOW_TARGET',
       level: cumulativeGPA < 1.5 ? RISK_LEVELS.CRITICAL : RISK_LEVELS.MEDIUM,
-      message: `Your cumulative GPA (${cumulativeGPA.toFixed(2)}) is below your target of ${targetGPA.toFixed(2)}. review your grade prediction to understand what you need.`,
+      message: `Your cumulative GPA (${cumulativeGPA.toFixed(2)}) is below your target of ${targetGPA.toFixed(2)}. Review your grade prediction to understand what you need.`,
     });
   }
 
@@ -294,16 +289,15 @@ export const detectRisks = ({
     alerts.push({
       type: 'HIGH_WORKLOAD',
       level: RISK_LEVELS.MEDIUM,
-      message: `You have ${pending.length} incomplete assignments. use the priority view to focus on what matters most.`,
+      message: `You have ${pending.length} incomplete assignments. Use the priority view to focus on what matters most.`,
     });
   }
 
   return alerts;
 };
 
-
 /**
-chronological grade trend from completed assignments
+ * chronological grade trend from completed assignments
  */
 export const analyzePerformanceTrend = (assignments) => {
   const graded = assignments
