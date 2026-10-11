@@ -1,29 +1,69 @@
-import { useEffect, useState } from "react";
+// src/Announcements.jsx - announcement board admins and advisors can post
+import { useEffect, useState } from 'react';
+import { apiFetch } from './api';
+import './notifications.css';
 
-function Announcements() {
-  const [announcements, setAnnouncements] = useState([]);
+const authorName = (a) => {
+  const u = a.createdBy;
+  if (!u) return '';
+  return u.firstName ? `${u.firstName} ${u.lastName ?? ''}`.trim() : u.name || '';
+};
 
-  useEffect(() => {
-    fetch("http://localhost:8001/api/announcements")
-      .then((res) => res.json())
-      .then((data) => setAnnouncements(data))
-      .catch((err) => console.log(err));
-  }, []);
+export default function Announcements({ token, user }) {
+  const [items, setItems] = useState([]);
+  const [form, setForm] = useState({ title: '', course: 'General', message: '' });
+  const [status, setStatus] = useState(null); // { type: 'ok' | 'error', text }
+  const canPost = ['admin', 'advisor'].includes(user?.role);
+
+  const load = async () => {
+    try { setItems(await apiFetch('/api/announcements', { token })); } catch { setItems([]); }
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [token]);
+
+  const post = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim() || !form.message.trim()) {
+      setStatus({ type: 'error', text: 'Enter a title and a message.' });
+      return;
+    }
+    try {
+      await apiFetch('/api/announcements', { method: 'POST', token, body: form });
+      setForm({ title: '', course: form.course, message: '' });
+      setStatus({ type: 'ok', text: 'Announcement posted.' });
+      load();
+    } catch (err) {
+      setStatus({ type: 'error', text: err.message });
+    }
+  };
 
   return (
-    <div>
-      <h2>Announcement Board</h2>
-
-      {announcements.length === 0 && <p>No announcements yet</p>}
-
-      {announcements.map((a, index) => (
-        <div key={index}>
-          <h4>{a.course}</h4>
+    <div className="dx-card">
+      <h2>Announcement board</h2>
+      {items.length === 0 && <p className="dx-muted">No announcements yet.</p>}
+      {items.map((a) => (
+        <div key={a._id} className="dx-announcement">
+          <strong>{a.title}</strong> <span className="dx-muted">({a.course}{authorName(a) ? `, ${authorName(a)}` : ''})</span>
           <p>{a.message}</p>
         </div>
       ))}
+      {canPost && (
+        <form onSubmit={post} style={{ marginTop: 14 }}>
+          <div className="dx-row" style={{ marginBottom: 8 }}>
+            <input className="dx-input dx-input-grow" placeholder="Title" aria-label="Announcement title"
+              value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <input className="dx-input" placeholder="Course" aria-label="Announcement course"
+              value={form.course} onChange={(e) => setForm({ ...form, course: e.target.value })} />
+          </div>
+          <textarea className="dx-input" style={{ width: '100%', boxSizing: 'border-box', marginBottom: 8 }} rows={2}
+            placeholder="Message" aria-label="Announcement message"
+            value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          <div className="dx-row">
+            <button className="dx-btn" type="submit">Post announcement</button>
+            {status && <span role="status" style={{ fontSize: 13, color: status.type === 'ok' ? '#2e7d32' : '#c62828' }}>{status.text}</span>}
+          </div>
+        </form>
+      )}
     </div>
   );
 }
-
-export default Announcements;
