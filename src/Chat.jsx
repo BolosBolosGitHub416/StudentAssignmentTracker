@@ -1,53 +1,55 @@
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+// src/Chat.jsx - course chat board (authenticated, history saved)
+import { useEffect, useRef, useState } from 'react';
+import { apiFetch } from './api';
+import { connectSocket } from './socket';
+import './notifications.css';
 
-const socket = io("http://localhost:8001");
-
-function Chat() {
-  const [message, setMessage] = useState("");
+export default function Chat({ token, courses = [] }) {
+  const options = [...new Set(['General', ...courses])];
+  const [course, setCourse] = useState('General');
+  const [text, setText] = useState('');
   const [messages, setMessages] = useState([]);
-  const [course, setCourse] = useState("CPAN212");
+  const boxRef = useRef(null);
 
   useEffect(() => {
-    socket.emit("joinCourse", course);
+    let active = true;
+    const socket = connectSocket(token);
+    socket.emit('joinCourse', course);
+    apiFetch(`/api/messages?course=${encodeURIComponent(course)}`, { token })
+      .then((history) => { if (active) setMessages(history); })
+      .catch(() => { if (active) setMessages([]); });
 
-    socket.on("courseMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    const onMessage = (msg) => { if (msg.course === course) setMessages((prev) => [...prev, msg]); };
+    socket.on('courseMessage', onMessage);
+    return () => { active = false; socket.off('courseMessage', onMessage); };
+  }, [token, course]);
 
-    return () => socket.off("courseMessage");
-  }, [course]);
+  useEffect(() => {
+    if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight;
+  }, [messages]);
 
-  const sendMessage = () => {
-    if (!message) return;
-
-    socket.emit("courseMessage", {
-      course,
-      message
-    });
-
-    setMessage("");
+  const send = (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    connectSocket(token).emit('courseMessage', { course, text });
+    setText('');
   };
 
   return (
-    <div>
-      <h2>Course Chat</h2>
-
-      <input
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type message"
-      />
-
-      <button onClick={sendMessage}>Send</button>
-
-      <div>
-        {messages.map((m, index) => (
-          <p key={index}>{m}</p>
-        ))}
+    <div className="dx-card">
+      <h2>Course chat</h2>
+      <select className="dx-input" value={course} onChange={(e) => setCourse(e.target.value)} aria-label="Course chat room">
+        {options.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
+      <div className="dx-chat-box" ref={boxRef}>
+        {messages.length === 0 && <p className="dx-muted">No messages in {course} yet. Say hello.</p>}
+        {messages.map((m, i) => <p key={m._id || i}><strong>{m.senderName}:</strong> {m.text}</p>)}
       </div>
+      <form className="dx-row" onSubmit={send}>
+        <input className="dx-input dx-input-grow" value={text} onChange={(e) => setText(e.target.value)}
+          placeholder={`Message ${course}`} maxLength={500} aria-label="Chat message" />
+        <button className="dx-btn" type="submit" disabled={!text.trim()}>Send</button>
+      </form>
     </div>
   );
 }
-
-export default Chat;
