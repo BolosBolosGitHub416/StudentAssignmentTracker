@@ -10,6 +10,10 @@ import assignmentRouter from "./routers/assignments.js";
 import userRouter from "./routers/users.js";
 import announcementRoutes from "./routers/announcements.js";
 import analyticsRouter from "./routers/analytics.js"; 
+import messageRouter from "./routers/messages.js";
+import notificationRouter from "./routers/notifications.js";
+import { registerSockets } from "./sockets/index.js";
+import { startReminderJob } from "./services/reminderJob.js";
 
 
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -30,7 +34,10 @@ const io = new Server(server, {
   }
 });
 
+app.set("io", io);
 app.use(cors());
+app.use("/api/messages", messageRouter);
+app.use("/api/notifications", notificationRouter);
 app.use(express.json());
 app.use(logger);
 
@@ -54,31 +61,12 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Socket connection
-io.on("connection", (socket) => {
-  console.log("User connected");
-
-  // join course room
-  socket.on("joinCourse", (course) => {
-    socket.join(course);
-  });
-
-  // receive message and broadcast
-  socket.on("courseMessage", (data) => {
-    io.to(data.course).emit("courseMessage", data.message);
-  });
-
-  // example notification
-  setTimeout(() => {
-    socket.emit("notification", "New assignment announcement posted!");
-  }, 5000);
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
-});
+registerSockets(io);
 
 const port = process.env.PORT || 8001;
 
 server.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
+startReminderJob(io);
