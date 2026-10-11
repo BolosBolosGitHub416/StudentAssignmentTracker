@@ -1,6 +1,6 @@
 // src/GpaTrendChart.jsx - GPA trend line stakeholder: adding GPA trends
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
-import './dustin.css';
+import './notifications.css';
 
 const label = (iso) => new Date(iso).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
 
