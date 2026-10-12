@@ -313,6 +313,7 @@ const MOCK_DATA = {
     { title: "Lab 3 Report", course: "CPAN 212", priority: "CRITICAL", daysUntilDue: 0.8, weight: 15 },
     { title: "Midterm Exam", course: "CPAN 314", priority: "HIGH", daysUntilDue: 2.5, weight: 30 },
     { title: "Assignment 4", course: "CPAN 212", priority: "MEDIUM", daysUntilDue: 4.1, weight: 10 },
+    { title: "Project Phase 1 Submission", course: "CPAN 324", priority: "HIGH", daysUntilDue: 5.2, weight: 25 },
   ],
   courses: [
     {
@@ -342,6 +343,22 @@ const MOCK_DATA = {
           { title: "Assignment 1", grade: 80, trend: "stable" },
           { title: "Lab 1", grade: 76, trend: "declining" },
           { title: "Quiz 1", grade: 65, trend: "declining" },
+        ],
+      },
+    },
+     {
+      courseName: "CPAN 324",
+      gpa: { gpa: 3.3, percentage: 82, letterGrade: "A-", totalWeight: 40 },
+      prediction: { predicted: 78.5, bestCase: 91, worstCase: 57, predictedLetter: "B+", remainingWeight: 60, completedWeight: 40 },
+      risk: { riskLevel: "LOW", alerts: ["📌 Current grade (82%) could be improved."], recommendations: ["Maintain consistent effort on remaining assignments."] },
+      trends: {
+        summary: "📈 Overall trend: improving. Average: 79%. Best: 88%, Lowest: 68%.",
+        trendData: [
+          { title: "Quiz 1", grade: 68, trend: "stable" },
+          { title: "Lab 1", grade: 75, trend: "improving" },
+          { title: "Assignment 1", grade: 82, trend: "improving" },
+          { title: "Midterm", grade: 85, trend: "improving" },
+          { title: "Lab 2", grade: 88, trend: "improving" },
         ],
       },
     },
