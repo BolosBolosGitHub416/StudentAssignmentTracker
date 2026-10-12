@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const assignmentSchema = new mongoose.Schema({
   title: {
@@ -19,6 +19,11 @@ const assignmentSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
+  weight: {
+    type: Number,
+    min: 0,
+    max: 100
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -32,4 +37,4 @@ const assignmentSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Assignment", assignmentSchema);
+export const assignments = mongoose.model("assignments", assignmentSchema);
