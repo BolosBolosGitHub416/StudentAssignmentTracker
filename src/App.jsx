@@ -67,6 +67,14 @@ function App() {
     <div className="container">
       <h1>Student Assignment Tracker</h1>
 
+      <h4> Welcome to the Home Page! </h4>
+      <h4> Links to Other Pages coming soon, 
+        including a login page, registration page, notifications page,
+        a dashboard for analytics page, and many more.
+      </h4>
+      <p> Student Assignment Tracker is currently in a work in progress,
+         and will be updated frequently in the future. </p>
+
       {/* Announcement Board */}
       <NotificationCenter token={token} />
       <Announcements token={token} user={user} />
