@@ -310,10 +310,15 @@ const MOCK_DATA = {
   totalAssignments: 8,
   completedAssignments: 5,
   upcomingPriority: [
-    { title: "Lab 3 Report", course: "CPAN 212", priority: "CRITICAL", daysUntilDue: 0.8, weight: 15 },
-    { title: "Midterm Exam", course: "CPAN 314", priority: "HIGH", daysUntilDue: 2.5, weight: 30 },
-    { title: "Assignment 4", course: "CPAN 212", priority: "MEDIUM", daysUntilDue: 4.1, weight: 10 },
-    { title: "Project Phase 1 Submission", course: "CPAN 324", priority: "HIGH", daysUntilDue: 5.2, weight: 25 },
+    { title: "Stakeholder Review Report 1", course: "CPAN 324", priority: "HIGH", daysUntilDue: 2, weight: 5 },
+    { title: "Project Phase 1 Submission", course: "CPAN 324", priority: "MEDIUM", daysUntilDue: 5, weight: 25 },
+    { title: "Stakeholder Review Report 2", course: "CPAN 324", priority: "MEDIUM", daysUntilDue: 3, weight: 5 },
+    { title: "Project Phase 2 Submission", course: "CPAN 324", priority: "CRITICAL", daysUntilDue: 1, weight: 25 },
+    { title: "Stakeholder Review Report 3", course: "CPAN 324", priority: "HIGH", daysUntilDue: 15, weight: 5 },
+    { title: "Project Phase 3 Submission", course: "CPAN 324", priority: "LOW", daysUntilDue: 22, weight: 25 },
+    { title: "Deployment Sign-Off", course: "CPAN 324", priority: "LOW", daysUntilDue: 29, weight: 10 },
+    { title: "Final Project Presentation", course: "CPAN 324", priority: "LOW", daysUntilDue: 36, weight: 15 },
+    
   ],
   courses: [
     {
@@ -354,11 +359,12 @@ const MOCK_DATA = {
       trends: {
         summary: "📈 Overall trend: improving. Average: 79%. Best: 88%, Lowest: 68%.",
         trendData: [
-          { title: "Quiz 1", grade: 68, trend: "stable" },
-          { title: "Lab 1", grade: 75, trend: "improving" },
-          { title: "Assignment 1", grade: 82, trend: "improving" },
-          { title: "Midterm", grade: 85, trend: "improving" },
-          { title: "Lab 2", grade: 88, trend: "improving" },
+          { title: "Project Phase 2 Submission", grade: 68, trend: "stable" },
+          { title: "Stakeholder Review Report 1", grade: 75, trend: "stable" },
+          { title: "Project Phase 1 Submission", grade: 82, trend: "improving" },
+          { title: "Stakeholder Review Report 2", grade: 85, trend: "improving" },
+          { title: "Project Phase 3 Submission", grade: 88, trend: "improving" },
+          { title: "Final Project Presentation", grade: 90, trend: "improving" },
         ],
       },
     },

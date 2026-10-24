@@ -40,7 +40,7 @@ export default function Announcements({ token, user }) {
   return (
     <div className="dx-card">
       <h2>Announcement board</h2>
-      {items.length === 0 && <p className="dx-muted">No announcements yet.</p>}
+      {items.length === 0 && <p className="dx-muted">No announcements yet. Stay tuned for updates!</p>}
       {items.map((a) => (
         <div key={a._id} className="dx-announcement">
           <strong>{a.title}</strong> <span className="dx-muted">({a.course}{authorName(a) ? `, ${authorName(a)}` : ''})</span>

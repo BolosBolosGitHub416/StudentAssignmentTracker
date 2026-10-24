@@ -52,14 +52,16 @@ function App() {
     const due = new Date(date);
     const diff = (due - today) / (1000 * 60 * 60 * 24);
 
+    if (diff <= 1) return "CRITICAL";
     if (diff <= 2) return "HIGH";
     if (diff <= 5) return "MEDIUM";
     return "LOW";
   };
 
   const getPriorityStyle = (priority) => {
-    if (priority === "HIGH") return { color: "#e53935" };
-    if (priority === "MEDIUM") return { color: "#fb8c00" };
+    if (priority === "CRITICAL") return { color: "#d50000" };
+    if (priority === "HIGH") return { color: "#fb8c00" };
+    if (priority === "MEDIUM") return { color: "#ffeb3b" };
     return { color: "#43a047" };
   };
 
@@ -67,13 +69,23 @@ function App() {
     <div className="container">
       <h1>Student Assignment Tracker</h1>
 
-      <h4> Welcome to the Home Page! </h4>
-      <h4> Links to Other Pages coming soon, 
+      <h4> Welcome to Student Assignment Tracker! </h4>
+      {/* <h4> Links to Other Pages coming soon, 
         including a login page, registration page, notifications page,
         a dashboard for analytics page, and many more.
-      </h4>
+      </h4> */}
       <p> Student Assignment Tracker is currently in a work in progress,
          and will be updated frequently in the future. </p>
+      
+      <div>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/login">Login </a></li>
+          <li><a href="/register">Register</a></li>
+          <li><a href="/notifications">Notifications</a></li>
+          <li><a href="/dashboard">Analytics Dashboard</a></li>
+        </ul>
+      </div>
 
       {/* Announcement Board */}
       <NotificationCenter token={token} />
@@ -83,6 +95,7 @@ function App() {
 
       {/* Form */}
       <div className="form">
+        <h4>➕ Add New Assignment:</h4>
         <input
           type="text"
           placeholder="Assignment Title"
@@ -115,6 +128,7 @@ function App() {
                 <p>Due: {a.date}</p>
 
                 <p style={getPriorityStyle(priority)}>
+                  {priority === "CRITICAL" && "🔥 Critical Priority"}
                   {priority === "HIGH" && "⚠️ High Priority"}
                   {priority === "MEDIUM" && "⚡ Medium Priority"}
                   {priority === "LOW" && "✅ Low Priority"}
@@ -130,8 +144,13 @@ function App() {
             );
           })
         )}
+        <footer>
+      <h4>&copy; 2026 Student Assignment Tracker - By Group 1 - Bolos Bolos, Dustin Nguyen, 
+        and Kaynaan Nuur.  All rights reserved.</h4>
+    </footer>
       </div>
     </div>
+    
   );
 }
 

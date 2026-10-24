@@ -3,6 +3,7 @@
 // Uses bcrypt for password hashing and JWT for authentication
 
 import bcrypt from "bcryptjs";
+import process from "node:process";
 import { generateToken } from "../middleware/auth.js"; // JWT generator
 import { users } from "../models/users.js"; // In-memory user store
 import sendEmail from "../utils/sendEmail.js"; // Email utility
@@ -45,12 +46,13 @@ export const register = async (req, res, next) => {
     // Save user
     users.push(newUser);
 
-    // SEND WELCOME EMAIL
-    await sendEmail(
-      email,
-      "Welcome to Student Portal",
-      `Hello ${firstName}, your account was successfully created.`
-    );
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      await sendEmail(
+        email,
+        "Welcome to Student Portal",
+        `Hello ${firstName}, your account was successfully created.`
+      );
+    }
 
     // Generate JWT
     const token = generateToken(newUser);
@@ -107,6 +109,7 @@ export const login = async (req, res, next) => {
 
 // USER PROFILE
 export const profile = (req, res) => {
-  const { password, ...user } = req.user;
+  const user = { ...req.user };
+  delete user.password;
   res.json({ user });
 };

@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to right, #e3f2fd, #fce4ec);
+  background:radial-gradient(circle, #aa00ff, #000000);
 }
 
 .container {
@@ -13,7 +13,7 @@ body {
 
 h1 {
   margin-bottom: 20px;
-  color: #333;
+  color: #d900ffdf;
 }
 
 h2 {
