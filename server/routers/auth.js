@@ -1,15 +1,17 @@
 // server/routers/auth.js
-import express from 'express'; // Express router for authentication-related routes
-// Import controller functions for handling authentication operations
+import express from 'express';
 import { login, register, profile } from '../controllers/authController.js';
 import { verifyToken } from '../middleware/auth.js';
-import sendEmail from "../utils/sendEmail.js";
+import {
+  validate,
+  registerSchema,
+  loginSchema,
+} from '../middleware/validate.js';
 
-const router = express.Router(); // Create a new router instance for authentication routes
+const router = express.Router();
 
-router.post('/register', register); // Route to handle user registration and return a JWT token
-router.post('/login', login); // Route to handle user login and return a JWT token
-router.get('/profile', verifyToken, profile); // Route to get the authenticated user's profile
-//  information (requires a valid JWT token)
+router.post('/register', validate(registerSchema), register);
+router.post('/login', validate(loginSchema), login);
+router.get('/profile', verifyToken, profile);
 
-export default router; // Export the router to be used in the main app.js file
+export default router;

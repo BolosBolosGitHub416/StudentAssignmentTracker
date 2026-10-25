@@ -4,12 +4,25 @@ import { PRIORITY_ORDER } from '../utils/notificationRules.js';
 
 const notificationSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    type: { type: String, enum: ['deadline', 'overdue', 'announcement', 'system'], default: 'deadline' },
-    priority: { type: String, enum: PRIORITY_ORDER, default: 'MEDIUM' },
-    title: { type: String, required: true },
-    message: { type: String, required: true },
-    assignmentId: { type: mongoose.Schema.Types.ObjectId },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    type: {
+      type: String,
+      enum: ['deadline', 'overdue', 'announcement', 'system'],
+      default: 'deadline',
+    },
+    priority: {
+      type: String,
+      enum: PRIORITY_ORDER,
+      default: 'MEDIUM',
+    },
+    title: { type: String, required: true, maxlength: 200 },
+    message: { type: String, required: true, maxlength: 1000 },
+    assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' },
     dedupeKey: { type: String },
     read: { type: Boolean, default: false },
   },
