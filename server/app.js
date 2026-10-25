@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-
 import authRouter from "./routers/auth.js";
 import assignmentRouter from "./routers/assignments.js";
 import userRouter from "./routers/users.js";
