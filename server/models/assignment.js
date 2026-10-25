@@ -91,7 +91,7 @@ assignmentSchema.index({ status: 1, dueDate: 1 }); // reminder window scans
 assignmentSchema.index({ course: 1, dueDate: -1 });
 
 // Keep status consistent with grade when possible
-assignmentSchema.pre('save', function setStatusFromGrade(next) {
+assignmentSchema.pre('save', function setStatusFromGrade() {
   if (this.grade !== null && this.grade !== undefined && this.status !== 'completed') {
     this.status = 'completed';
   }
