@@ -5,6 +5,7 @@ import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import authRouter from "./routers/auth.js";
+import { fileURLToPath } from "node:url";
 import assignmentRouter from "./routers/assignments.js";
 import userRouter from "./routers/users.js";
 import analyticsRouter from "./routers/analytics.js";
