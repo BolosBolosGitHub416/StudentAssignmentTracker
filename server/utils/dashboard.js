@@ -29,8 +29,28 @@ export const buildCourseSnapshot = (courseName, list) => {
   const { average, gpa, letter } = calculateCourseGPA(list);
   const graded = list.filter(isGraded);
   const remaining = list.filter((a) => !isGraded(a));
-  const p = predictGrade(graded, remaining);
-  const sumWeight = (items) => items.reduce((s, a) => s + (a.weight || 0), 0);
+const gradedWeight = graded.reduce(
+  (total, a) => total + (Number(a.weight) || 0),
+  0
+);
+
+const remainingWeight = Math.max(0, 100 - gradedWeight);
+
+const ungradedWeight = remaining.reduce(
+  (total, a) => total + (Number(a.weight) || 0),
+  0
+);
+
+const unplannedWeight = Math.max(0, remainingWeight - ungradedWeight);
+
+const predictionRemaining = [
+  ...remaining,
+  ...(unplannedWeight > 0
+    ? [{ title: "Unplanned coursework", weight: unplannedWeight }]
+    : [])
+];
+
+const p = predictGrade(graded, predictionRemaining);  const sumWeight = (items) => items.reduce((s, a) => s + (a.weight || 0), 0);
 
   const predicted = p.projectedFinal ?? 0;
   const risks = detectRisks({ assignments: list, courses: [{ name: courseName, assignments: list }] });
@@ -65,7 +85,7 @@ export const buildCourseSnapshot = (courseName, list) => {
       bestCase: p.scenario?.optimistic ?? 0,
       worstCase: p.scenario?.pessimistic ?? 0,
       predictedLetter: p.projectedFinal === null ? null : gradeToLetter(predicted),
-      remainingWeight: sumWeight(remaining),
+remainingWeight,
       completedWeight: sumWeight(graded),
     },
     risk: { riskLevel, alerts: risks.map((r) => r.message), recommendations },

@@ -104,8 +104,7 @@ function TrendChart({ trendData }) {
   );
 }
 
-export default function AnalyticsDashboard({ token }) {
-  const [data, setData] = useState(null);
+export default function AnalyticsDashboard({ token, refreshKey }) {  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
@@ -120,19 +119,24 @@ export default function AnalyticsDashboard({ token }) {
         const json = await res.json();
         setData(json);
         if (json.courses?.length > 0) setSelectedCourse(json.courses[0].courseName);
-      } catch {
-        setData(MOCK_DATA);
-        setSelectedCourse(MOCK_DATA.courses[0].courseName);
-      } finally {
+      } catch (error) {
+  console.error("Analytics dashboard error:", error);
+  setData(null);
+}finally {
         setLoading(false);
       }
     };
     load();
-  }, [token]);
-
+}, [token, refreshKey]);
   if (loading) return <div className="card" style={{ textAlign: "center", padding: 30 }}><p style={{ color: "#9e9e9e" }}>Loading analytics…</p></div>;
-  if (!data) return null;
-
+if (!data) {
+  return (
+    <div className="card">
+      <h3>Analytics Dashboard</h3>
+      <p>Unable to load analytics data. Please check the backend connection.</p>
+    </div>
+  );
+}
   const course = data.courses?.find((c) => c.courseName === selectedCourse);
   const completedPct = data.totalAssignments > 0 ? Math.round((data.completedAssignments / data.totalAssignments) * 100) : 0;
 
@@ -157,7 +161,7 @@ export default function AnalyticsDashboard({ token }) {
   title="Completed"
   value={data.completedAssignments}
   color="#2e7d32"
-  sub="63% done"
+  sub={`${completedPct}% done`}
   icon="✅"
 />
 

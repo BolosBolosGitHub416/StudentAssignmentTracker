@@ -5,14 +5,64 @@ import Chat from "./Chat";
 import { io } from "socket.io-client";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import NotificationCenter from "./NotificationCenter";
+import Login from "./Login";
 
 function App() {
   const [assignments, setAssignments] = useState([]);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
+  const [course, setCourse] = useState("");
+  const [grade, setGrade] = useState("");
+  const [weight, setWeight] = useState("");
   const [token, setToken] = useState(localStorage.getItem("token") || "");
-  const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "null"));
-  
+  const [refreshKey, setRefreshKey] = useState(0);
+
+useEffect(() => {
+  if (!token) return;
+
+  const loadAssignments = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8001/api/assignments",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load assignments");
+      }
+
+      const data = await response.json();
+
+      setAssignments(
+        data.map((assignment) => ({
+          ...assignment,
+          date: assignment.dueDate
+        }))
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadAssignments();
+}, [token]);
+
+const [user, setUser] = useState(() =>
+  JSON.parse(localStorage.getItem("user") || "null")
+);
+
+const [page, setPage] = useState(window.location.pathname);
+
+const handleLogin = (newToken, newUser) => {
+  setToken(newToken);
+  setUser(newUser);
+  window.history.pushState({}, "", "/");
+  setPage("/");
+};
 
   useEffect(() => {
   const socket = io("http://localhost:8001");
@@ -32,20 +82,98 @@ function App() {
     localStorage.setItem("assignments", JSON.stringify(assignments));
   }, [assignments]);
 
-  const addAssignment = () => {
-    if (!title || !date) return;
+  
+const addAssignment = async () => {
+  if (!title || !date) return;
 
-    const newAssignment = { title, date };
-    setAssignments([...assignments, newAssignment]);
+  if (!token) {
+    alert("Please log in first.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://localhost:8001/api/assignments",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+  title,
+  dueDate: date,
+  course: course.trim() || "General",
+  grade: grade === "" ? null : Number(grade),
+  weight: weight === "" ? 0 : Number(weight)
+})
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to add assignment");
+    }
+
+    setAssignments((prev) => [
+      ...prev,
+      {
+        ...data,
+        date: data.dueDate
+      }
+    ]);
 
     setTitle("");
     setDate("");
-  };
+    setCourse("");
+    setGrade("");
+setWeight("");
+setRefreshKey((prev) => prev + 1);
+    alert("Assignment added successfully!");
 
-  const deleteAssignment = (index) => {
-    const updated = assignments.filter((_, i) => i !== index);
-    setAssignments(updated);
-  };
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+};
+
+
+  
+const deleteAssignment = async (index) => {
+  const assignment = assignments[index];
+
+  if (!assignment?.id) {
+    alert("Assignment ID not found.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:8001/api/assignments/${assignment.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete assignment");
+    }
+
+    setAssignments((prev) =>
+      prev.filter((item) => item.id !== assignment.id)
+    );
+setRefreshKey((prev) => prev + 1);
+    alert("Assignment deleted successfully!");
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+};
+
 
   const checkPriority = (date) => {
     const today = new Date();
@@ -80,19 +208,28 @@ function App() {
       <div>
         <ul>
           <li><a href="/">Home</a></li>
-          <li><a href="/login">Login </a></li>
-          <li><a href="/register">Register</a></li>
+<li>
+  <a href="/login" onClick={(e) => {
+    e.preventDefault();
+    window.history.pushState({}, "", "/login");
+    setPage("/login");
+  }}>
+    Login
+  </a>
+</li>          <li><a href="/register">Register</a></li>
           <li><a href="/notifications">Notifications</a></li>
           <li><a href="/dashboard">Analytics Dashboard</a></li>
         </ul>
       </div>
 
       {/* Announcement Board */}
+      {page === "/login" && (
+  <Login onLogin={handleLogin} />
+)}
       <NotificationCenter token={token} />
       <Announcements token={token} user={user} />
       <Chat token={token} />
-      <AnalyticsDashboard token={token} />
-
+<AnalyticsDashboard token={token} refreshKey={refreshKey} />
       {/* Form */}
       <div className="form">
         <h4>➕ Add New Assignment:</h4>
@@ -108,7 +245,28 @@ function App() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-
+        <input
+  type="text"
+  placeholder="Course (e.g. CPAN 324)"
+  value={course}
+  onChange={(e) => setCourse(e.target.value)}
+/>
+<input
+  type="number"
+  placeholder="Grade (%)"
+  min="0"
+  max="100"
+  value={grade}
+  onChange={(e) => setGrade(e.target.value)}
+/>
+<input
+  type="number"
+  placeholder="Weight (%)"
+  min="0"
+  max="100"
+  value={weight}
+  onChange={(e) => setWeight(e.target.value)}
+/>
         <button onClick={addAssignment}>Add Assignment</button>
       </div>
 
