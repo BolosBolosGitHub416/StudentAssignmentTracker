@@ -1,12 +1,19 @@
 import assert from "node:assert/strict";
 import { after, before, beforeEach, test } from "node:test";
+import { rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import process from "node:process";
-import app from "./app.js";
-import { assignments } from "./models/assignments.js";
-import { users } from "./models/users.js";
-import { generateToken } from "./middleware/auth.js";
 
 process.env.JWT_SECRET = "test-only-secret";
+process.env.USER_STORE_FILE = join(tmpdir(), `student-assignment-tracker-users-${process.pid}.json`);
+
+const [{ default: app }, { assignments }, { users }, { generateToken }] = await Promise.all([
+  import("./app.js"),
+  import("./models/assignments.js"),
+  import("./models/users.js"),
+  import("./middleware/auth.js"),
+]);
 
 let server;
 let baseUrl;
@@ -21,6 +28,7 @@ after(async () => {
   await new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()));
   });
+  rmSync(process.env.USER_STORE_FILE, { force: true });
 });
 
 beforeEach(() => {
@@ -69,6 +77,21 @@ test("registration stores a user and returns a token without the password", asyn
   assert.equal(body.user.email, "student@example.com");
   assert.equal("password" in body.user, false);
   assert.equal(users.length, 1);
+
+  const { users: reloadedUsers } = await import(`./models/users.js?reload=${Date.now()}`);
+  assert.equal(reloadedUsers[0].email, "student@example.com");
+  assert.equal(reloadedUsers[0].password, users[0].password);
+
+  const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: " STUDENT@example.com ",
+      password: "password123",
+    }),
+  });
+  assert.equal(loginResponse.status, 200);
+  assert.equal(typeof (await loginResponse.json()).token, "string");
 });
 
 test("assignment routes reject requests without an authorization token", async () => {
@@ -109,4 +132,101 @@ test("assignment route creates and lists an assignment for a teacher", async () 
 
   assert.equal(listResponse.status, 200);
   assert.deepEqual(await listResponse.json(), [created]);
+});
+
+test("students can create assignments owned by their authenticated user", async () => {
+  const token = generateToken({
+    _id: "student-1",
+    email: "student@example.com",
+    role: "student",
+  });
+  const createResponse = await fetch(`${baseUrl}/api/assignments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      title: "Lab report",
+      course: "Biology 101",
+      weight: 20,
+      dueDate: "2026-11-01",
+      status: "in_progress",
+      grade: 95,
+      userId: "another-student",
+      studentId: "another-student",
+    }),
+  });
+  const created = await createResponse.json();
+
+  assert.equal(createResponse.status, 201);
+  assert.equal(created.course, "Biology 101");
+  assert.equal(created.weight, 20);
+  assert.equal(created.status, "in_progress");
+  assert.equal(created.grade, 95);
+  assert.equal(created.userId, "student-1");
+  assert.equal(created.studentId, "student-1");
+
+  const listResponse = await fetch(`${baseUrl}/api/assignments`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  assert.equal(listResponse.status, 200);
+  assert.deepEqual(await listResponse.json(), [created]);
+});
+
+test("student assignment validation rejects invalid weights and grades", async () => {
+  const token = generateToken({
+    _id: "student-1",
+    email: "student@example.com",
+    role: "student",
+  });
+
+  for (const invalidField of ["weight", "grade"]) {
+    const response = await fetch(`${baseUrl}/api/assignments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: "Lab report",
+        dueDate: "2026-11-01",
+        [invalidField]: 101,
+      }),
+    });
+
+    assert.equal(response.status, 400);
+  }
+});
+
+test("analytics dashboard returns metrics for the authenticated student's assignments", async () => {
+  const userId = "student-analytics";
+  const token = generateToken({
+    _id: userId,
+    email: "analytics@example.com",
+    role: "student",
+  });
+  assignments.push({
+    id: "assignment-analytics",
+    title: "Lab report",
+    course: "Biology 101",
+    dueDate: "2026-11-01",
+    weight: 20,
+    grade: 88,
+    status: "completed",
+    studentId: userId,
+  });
+
+  const response = await fetch(`${baseUrl}/api/analytics/dashboard`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const dashboard = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(dashboard.totalAssignments, 1);
+  assert.equal(dashboard.completedAssignments, 1);
+  assert.equal(dashboard.totalCourses, 1);
+  assert.equal(dashboard.courses[0].courseName, "Biology 101");
+  assert.equal(dashboard.courses[0].gpa.percentage, 88);
 });

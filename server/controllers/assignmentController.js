@@ -8,7 +8,7 @@ export const listAssignments = (req, res) => {
 
   if (user.role === 'student') {
     const studentAssignments = assignments.filter(
-      (assignment) => (assignment.userId || assignment.studentId) === user.userId
+      (assignment) => String(assignment.userId || assignment.studentId) === String(user.userId)
     );
     return res.json(studentAssignments);
   }
@@ -24,7 +24,7 @@ export const getAssignment = (req, res) => {
 
   if (
     req.user.role === 'student' &&
-    (assignment.userId || assignment.studentId) !== req.user.userId
+    String(assignment.userId || assignment.studentId) !== String(req.user.userId)
   ) {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -41,7 +41,8 @@ export const createAssignment = (req, res) => {
     dueDate,
     course,
     grade,
-    weight
+    weight,
+    status = "assigned",
   } = req.body;
 
   const currentUserId = req.user.userId;
@@ -58,17 +59,37 @@ export const createAssignment = (req, res) => {
     });
   }
 
+  const numericWeight = weight == null || weight === "" ? null : Number(weight);
+  const numericGrade = grade == null || grade === "" ? null : Number(grade);
+  if (
+    numericWeight !== null &&
+    (!Number.isFinite(numericWeight) || numericWeight < 0 || numericWeight > 100)
+  ) {
+    return res.status(400).json({ error: "weight must be a number between 0 and 100" });
+  }
+  if (
+    numericGrade !== null &&
+    (!Number.isFinite(numericGrade) || numericGrade < 0 || numericGrade > 100)
+  ) {
+    return res.status(400).json({ error: "grade must be a number between 0 and 100" });
+  }
+  if (!["assigned", "in_progress", "completed"].includes(status)) {
+    return res.status(400).json({ error: "status is not valid" });
+  }
+
   const newAssignment = {
     id: `${Date.now()}`,
     title,
     description: description || "",
     studentId: ownerId,
+    userId: ownerId,
     dueDate,
     course: course || "General",
-    grade: grade ?? null,
-    weight: weight ?? 0,
+    grade: numericGrade,
+    weight: numericWeight ?? 0,
     createdBy: currentUserId,
-status: grade !== null && grade !== undefined ? "completed" : "assigned"  };
+    status,
+  };
 
   assignments.push(newAssignment);
 
@@ -143,7 +164,6 @@ export const deleteAssignment = (req, res) => {
     });
   }
 
-  const assignment = assignments[index];
   if (
     req.user.role === 'student' &&
     (assignment.userId || assignment.studentId) !== req.user.userId

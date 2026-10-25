@@ -1,13 +1,14 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { fileURLToPath } from "node:url";
 import authRouter from "./routers/auth.js";
 import assignmentRouter from "./routers/assignments.js";
 import userRouter from "./routers/users.js";
 import analyticsRouter from "./routers/analytics.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
-dotenv.config();
+dotenv.config({ path: fileURLToPath(new URL("./.env", import.meta.url)) });
 
 const app = express();
 

@@ -5,7 +5,8 @@ import { assignments } from '../models/assignments.js';
 // the Assignment model (teammate) must store: userId, course, title, dueDate, weight, grade, status
 const load = async (userId, course) => {
   return assignments.filter((assignment) => {
-const matchesUser = String(assignment.studentId) === String(userId);    const matchesCourse = !course || assignment.course === course;
+    const matchesUser = String(assignment.userId || assignment.studentId) === String(userId);
+    const matchesCourse = !course || assignment.course === course;
 
     return matchesUser && matchesCourse;
   });

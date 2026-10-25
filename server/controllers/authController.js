@@ -5,28 +5,31 @@
 import bcrypt from "bcryptjs";
 import process from "node:process";
 import { generateToken } from "../middleware/auth.js"; // JWT generator
-import { users } from "../models/users.js"; // In-memory user store
+import { saveUsers, users } from "../models/users.js";
 import sendEmail from "../utils/sendEmail.js"; // Email utility
 
 // Helper function to find a user by email
 const findUserByEmail = (email) =>
-  users.find((user) => user.email === email);
+  users.find((user) => user.email === email.trim().toLowerCase());
 
 
 // REGISTER USER
 export const register = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, role = "student" } = req.body;
+    const { password, firstName, lastName } = req.body;
+    const normalizedEmail = typeof req.body.email === "string"
+      ? req.body.email.trim().toLowerCase()
+      : "";
 
     // Validate required fields
-    if (!email || !password || !firstName || !lastName) {
+    if (!normalizedEmail || !password || !firstName || !lastName) {
       return res
         .status(400)
         .json({ error: "Missing required registration fields" });
     }
 
     // Check if email already exists
-    if (findUserByEmail(email)) {
+    if (findUserByEmail(normalizedEmail)) {
       return res.status(409).json({ error: "Email already registered" });
     }
 
@@ -36,19 +39,25 @@ export const register = async (req, res, next) => {
     // Create user object
     const newUser = {
       _id: `${Date.now()}`,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       firstName,
       lastName,
-      role,
+      role: "student",
     };
 
     // Save user
     users.push(newUser);
+    try {
+      saveUsers();
+    } catch (error) {
+      users.pop();
+      throw error;
+    }
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       await sendEmail(
-        email,
+        normalizedEmail,
         "Welcome to Student Portal",
         `Hello ${firstName}, your account was successfully created.`
       );
@@ -71,7 +80,10 @@ export const register = async (req, res, next) => {
 // LOGIN USER
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = typeof req.body.email === "string"
+      ? req.body.email.trim().toLowerCase()
+      : "";
 
     // Validate input
     if (!email || !password) {
