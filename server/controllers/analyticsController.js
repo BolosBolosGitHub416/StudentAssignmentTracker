@@ -1,13 +1,14 @@
 // server/controllers/analyticsController.js
 import { calculateCourseGPA, calculateCumulativeGPA } from '../utils/analytics.js';
 import { buildCourseSnapshot, buildDashboard, buildPriorityList, groupByCourse } from '../utils/dashboard.js';
-import { getModel } from '../utils/models.js';
-
+import { assignments } from '../models/assignments.js';
 // the Assignment model (teammate) must store: userId, course, title, dueDate, weight, grade, status
-const load = (userId, course) => {
-  const query = { userId };
-  if (course) query.course = course;
-  return getModel('Assignment').find(query).lean();
+const load = async (userId, course) => {
+  return assignments.filter((assignment) => {
+const matchesUser = String(assignment.studentId) === String(userId);    const matchesCourse = !course || assignment.course === course;
+
+    return matchesUser && matchesCourse;
+  });
 };
 
 // GET /api/analytics/dashboard

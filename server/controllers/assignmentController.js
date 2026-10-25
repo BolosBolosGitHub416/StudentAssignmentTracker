@@ -32,63 +32,49 @@ export const getAssignment = (req, res) => {
   res.json(assignment);
 };
 // Create a new assignment
-export const createAssignment = (req, res) => {
-  const { title, course, weight, description, dueDate, status, grade } = req.body;
-  const requestedUserId = req.body.userId || req.body.studentId;
-  const userId = req.user.role === 'student' ? req.user.userId : requestedUserId;
-  const numericWeight = Number(weight);
-  const numericGrade = grade === undefined || grade === null ? null : Number(grade);
 
-  if (
-    typeof title !== 'string' ||
-    !title.trim() ||
-    typeof course !== 'string' ||
-    !course.trim() ||
-    typeof dueDate !== 'string' ||
-    !dueDate ||
-    !userId
-  ) {
+export const createAssignment = (req, res) => {
+  const {
+    title,
+    description,
+    studentId,
+    dueDate,
+    course,
+    grade,
+    weight
+  } = req.body;
+
+  const currentUserId = req.user.userId;
+
+  // Students can only create assignments for themselves
+  const ownerId =
+    req.user.role === "student"
+      ? currentUserId
+      : studentId;
+
+  if (!title || !ownerId || !dueDate) {
     return res.status(400).json({
-      error: 'title, course, dueDate, and userId are required',
+      error: "Title, student ID, and due date are required"
     });
-  }
-  if (
-    weight === undefined ||
-    weight === '' ||
-    !Number.isFinite(numericWeight) ||
-    numericWeight < 0 ||
-    numericWeight > 100
-  ) {
-    return res.status(400).json({ error: 'weight must be a number between 0 and 100' });
-  }
-  if (
-    grade !== undefined &&
-    grade !== null &&
-    (grade === '' || !Number.isFinite(numericGrade) || numericGrade < 0 || numericGrade > 100)
-  ) {
-    return res.status(400).json({ error: 'grade must be a number between 0 and 100' });
-  }
-  if (status !== undefined && !['assigned', 'in progress', 'completed'].includes(status)) {
-    return res.status(400).json({ error: 'status is not valid' });
   }
 
   const newAssignment = {
     id: `${Date.now()}`,
-    title: title.trim(),
-    course: course.trim(),
-    weight: numericWeight,
-    description: description || '',
-    userId,
-    studentId: userId,
+    title,
+    description: description || "",
+    studentId: ownerId,
     dueDate,
-    createdBy: req.user.userId,
-    status: status || 'assigned',
-    grade: numericGrade,
-  };
+    course: course || "General",
+    grade: grade ?? null,
+    weight: weight ?? 0,
+    createdBy: currentUserId,
+status: grade !== null && grade !== undefined ? "completed" : "assigned"  };
 
   assignments.push(newAssignment);
+
   res.status(201).json(newAssignment);
 };
+
 // Update an existing assignment
 export const updateAssignment = (req, res) => {
   const assignment = assignments.find((item) => item.id === req.params.id);
@@ -133,10 +119,28 @@ export const updateAssignment = (req, res) => {
   res.json(assignment);
 };
 // Delete an assignment
+
 export const deleteAssignment = (req, res) => {
-  const index = assignments.findIndex((item) => item.id === req.params.id);
+  const index = assignments.findIndex(
+    (item) => item.id === req.params.id
+  );
+
   if (index === -1) {
-    return res.status(404).json({ error: 'Assignment not found' });
+    return res.status(404).json({
+      error: "Assignment not found"
+    });
+  }
+
+  const assignment = assignments[index];
+
+  // Students can only delete their own assignments
+  if (
+    req.user.role === "student" &&
+    String(assignment.studentId) !== String(req.user.userId)
+  ) {
+    return res.status(403).json({
+      error: "You can only delete your own assignments"
+    });
   }
 
   const assignment = assignments[index];
@@ -148,5 +152,6 @@ export const deleteAssignment = (req, res) => {
   }
 
   const [deleted] = assignments.splice(index, 1);
+
   res.json({ deleted });
 };
