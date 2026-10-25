@@ -2,10 +2,19 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Announcements from "./Announcements";
 import Chat from "./Chat";
-import { io } from "socket.io-client";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import NotificationCenter from "./NotificationCenter";
 import Login from "./Login";
+
+function readUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    return null;
+  }
+}
 
 function App() {
   const [assignments, setAssignments] = useState([]);
@@ -14,7 +23,9 @@ function App() {
   const [course, setCourse] = useState("");
   const [grade, setGrade] = useState("");
   const [weight, setWeight] = useState("");
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [token, setToken] = useState(() =>
+    readUser() ? localStorage.getItem("token") || "" : ""
+  );
   const [refreshKey, setRefreshKey] = useState(0);
 
 useEffect(() => {
@@ -51,28 +62,21 @@ useEffect(() => {
   loadAssignments();
 }, [token]);
 
-const [user, setUser] = useState(() =>
-  JSON.parse(localStorage.getItem("user") || "null")
-);
-
-const [page, setPage] = useState(window.location.pathname);
+const [user, setUser] = useState(readUser);
 
 const handleLogin = (newToken, newUser) => {
+  localStorage.setItem("token", newToken);
+  localStorage.setItem("user", JSON.stringify(newUser));
   setToken(newToken);
   setUser(newUser);
-  window.history.pushState({}, "", "/");
-  setPage("/");
 };
 
-  useEffect(() => {
-  const socket = io("http://localhost:8001");
-
-  socket.on("notification", (msg) => {
-    setNotification(msg);
-  });
-
-  return () => socket.disconnect();
-}, []);
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  setToken("");
+  setUser(null);
+};
 
   // Load saved data
 
@@ -193,6 +197,14 @@ setRefreshKey((prev) => prev + 1);
     return { color: "#43a047" };
   };
 
+  if (!token || !user) {
+    return (
+      <div className="app-shell">
+        <Login onLogin={handleLogin} />
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <h1>Student Assignment Tracker</h1>
@@ -208,24 +220,11 @@ setRefreshKey((prev) => prev + 1);
       <div>
         <ul>
           <li><a href="/">Home</a></li>
-<li>
-  <a href="/login" onClick={(e) => {
-    e.preventDefault();
-    window.history.pushState({}, "", "/login");
-    setPage("/login");
-  }}>
-    Login
-  </a>
-</li>          <li><a href="/register">Register</a></li>
-          <li><a href="/notifications">Notifications</a></li>
-          <li><a href="/dashboard">Analytics Dashboard</a></li>
+          <li><button className="text-button" onClick={handleLogout} type="button">Sign out</button></li>
         </ul>
       </div>
 
       {/* Announcement Board */}
-      {page === "/login" && (
-  <Login onLogin={handleLogin} />
-)}
       <NotificationCenter token={token} />
       <Announcements token={token} user={user} />
       <Chat token={token} />

@@ -72,3 +72,247 @@ h2 {
 .deleteBtn:hover {
   background-color: #c62828;
 }
+
+.app-shell {
+  width: min(1040px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+  color: #fff;
+  background: transparent;
+  text-align: left;
+}
+
+.auth-screen {
+  min-height: calc(100vh - 64px);
+  display: grid;
+  place-items: center;
+}
+
+.auth-card,
+.assignment-form,
+.assignment-card {
+  padding: 28px;
+  border: 1px solid #e8e1ee;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(35, 17, 50, 0.08);
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  box-sizing: border-box;
+}
+
+.auth-card h2,
+.section-heading h2 {
+  margin: 6px 0 8px;
+  color: #211a2b;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #7c3aac;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.auth-description,
+.section-heading > p:last-child {
+  margin: 0 0 22px;
+  color: #706779;
+  font-size: 14px;
+}
+
+.auth-card label,
+.assignment-form label {
+  display: grid;
+  gap: 7px;
+  color: #393143;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-card > label,
+.auth-name-fields {
+  margin-top: 16px;
+}
+
+.auth-name-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.auth-card input,
+.assignment-form input,
+.assignment-form select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  box-sizing: border-box;
+  border: 1px solid #d9d1df;
+  border-radius: 8px;
+  background: #fff;
+  color: #211a2b;
+  font: inherit;
+}
+
+.primary-button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #7135a5;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #5b278a;
+}
+
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.auth-card > .primary-button,
+.assignment-form > .primary-button {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: #7135a5;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-card > .text-button {
+  display: block;
+  margin: 16px auto 0;
+}
+
+.form-error {
+  grid-column: 1 / -1;
+  margin: 12px 0 0;
+  color: #b42318;
+  font-size: 14px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e8e1ee;
+}
+
+.app-header h1 {
+  margin: 6px 0 0;
+  color: #fff;
+  font-size: 30px;
+  letter-spacing: -0.5px;
+}
+
+.assignment-section {
+  margin: 30px 0;
+}
+
+.section-heading h2 {
+  color: #fff;
+}
+
+.section-heading > p:last-child,
+.assignment-list > p {
+  color: #e6d9ed;
+}
+
+.assignment-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.assignment-form > .primary-button {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+.assignment-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.assignment-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+}
+
+.assignment-card h3 {
+  margin: 0 0 4px;
+}
+
+.assignment-card p,
+.assignment-card dl {
+  margin: 0;
+  color: #706779;
+  font-size: 14px;
+}
+
+.assignment-card dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.assignment-card dt {
+  color: #8a8191;
+  font-size: 12px;
+}
+
+.assignment-card dd {
+  margin: 0;
+  color: #393143;
+  text-transform: capitalize;
+}
+
+.app-footer {
+  padding: 24px 0;
+  color: #8a8191;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 20px 14px;
+  }
+
+  .assignment-form,
+  .auth-name-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .assignment-card dl {
+    justify-content: flex-start;
+  }
+}

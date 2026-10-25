@@ -6,6 +6,7 @@ import ProgressBar from "./components/ProgressBar";
 import StatCard from "./components/StatCard";
 import RiskCard from "./components/RiskCard";
 import PerformanceChart from "./components/PerformanceChart";
+import { apiFetch } from "./api";
 
 const PRIORITY_COLORS = {
   OVERDUE:  { bg: "#fdecea", text: "#c62828", border: "#e53935" },
@@ -107,33 +108,40 @@ function TrendChart({ trendData }) {
 export default function AnalyticsDashboard({ token, refreshKey }) {  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
     const load = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8001/api/analytics/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error();
-        const json = await res.json();
-        setData(json);
-        if (json.courses?.length > 0) setSelectedCourse(json.courses[0].courseName);
-      } catch (error) {
-  console.error("Analytics dashboard error:", error);
-  setData(null);
-}finally {
-        setLoading(false);
+        setError("");
+        const json = await apiFetch("/api/analytics/dashboard", { token });
+        if (active) {
+          setData(json);
+          setSelectedCourse(json.courses?.[0]?.courseName || null);
+        }
+      } catch (requestError) {
+        if (active) {
+          console.error("Analytics dashboard error:", requestError);
+          setData(null);
+          setError(requestError.message);
+        }
+      } finally {
+        if (active) setLoading(false);
       }
     };
     load();
-}, [token, refreshKey]);
+    return () => {
+      active = false;
+    };
+  }, [token, refreshKey]);
   if (loading) return <div className="card" style={{ textAlign: "center", padding: 30 }}><p style={{ color: "#9e9e9e" }}>Loading analytics…</p></div>;
 if (!data) {
   return (
     <div className="card">
       <h3>Analytics Dashboard</h3>
-      <p>Unable to load analytics data. Please check the backend connection.</p>
+      <p>{error || "Unable to load analytics data."}</p>
     </div>
   );
 }
