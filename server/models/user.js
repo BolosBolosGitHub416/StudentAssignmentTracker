@@ -62,10 +62,12 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ role: 1, createdAt: -1 });
 
 // hash password only when it is new or modified
-userSchema.pre('save', async function hashPassword(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) {
+        return;
+    }
+
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidate) {
