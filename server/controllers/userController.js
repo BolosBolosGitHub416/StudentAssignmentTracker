@@ -1,20 +1,30 @@
 // server/controllers/userController.js
-// Controller functions for user-related operations
-// These functions handle the logic for listing users and getting user details
-// Import the in-memory user store (replace with DB in production)
-import { users } from '../models/users.js';
-// List all users (admin only)
-export const listUsers = (req, res) => {
-  const safeUsers = users.map(({ password, ...user }) => user);
-  res.json(safeUsers);
-};
-// Get a specific user by ID (admin only)
-export const getUser = (req, res) => {
-  const user = users.find((item) => item._id === req.params.id);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+// Admin-only user listing MongoDB backed
 
-  const { password, ...safeUser } = user;
-  res.json(safeUser);
+import User from '../models/user.js';
+
+export const listUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().select('-password').lean();
+    res.json(
+      users.map((u) => ({
+        ...u,
+        id: String(u._id),
+      }))
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password').lean();
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ ...user, id: String(user._id) });
+  } catch (err) {
+    next(err);
+  }
 };
