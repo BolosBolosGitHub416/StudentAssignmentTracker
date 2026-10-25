@@ -1,115 +1,84 @@
 // server/controllers/authController.js
-// Handles user registration, login, and profile retrieval
-// Uses bcrypt for password hashing and JWT for authentication
+// Password hashing is handled by the User pre-save hook 
 
-import bcrypt from "bcryptjs";
-import process from "node:process";
-import { generateToken } from "../middleware/auth.js"; // JWT generator
-import { users } from "../models/users.js"; // In-memory user store
-import sendEmail from "../utils/sendEmail.js"; // Email utility
+import User from '../models/user.js';
+import { generateToken } from '../middleware/auth.js';
+import sendEmail from '../utils/sendEmail.js';
 
-// Helper function to find a user by email
-const findUserByEmail = (email) =>
-  users.find((user) => user.email === email);
-
-
-// REGISTER USER
 export const register = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, role = "student" } = req.body;
+    const { email, password, firstName, lastName, role = 'student' } = req.body;
 
-    // Validate required fields
-    if (!email || !password || !firstName || !lastName) {
-      return res
-        .status(400)
-        .json({ error: "Missing required registration fields" });
+    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existing) {
+      return res.status(409).json({ error: 'Email already registered' });
     }
 
-    // Check if email already exists
-    if (findUserByEmail(email)) {
-      return res.status(409).json({ error: "Email already registered" });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user object
-    const newUser = {
-      _id: `${Date.now()}`,
+    const newUser = await User.create({
       email,
-      password: hashedPassword,
+      password,
       firstName,
       lastName,
       role,
-    };
-
-    // Save user
-    users.push(newUser);
+    });
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      await sendEmail(
-        email,
-        "Welcome to Student Portal",
-        `Hello ${firstName}, your account was successfully created.`
-      );
+      try {
+        await sendEmail(
+          email,
+          'Welcome to Student Portal',
+          `Hello ${firstName}, your account was successfully created.`
+        );
+      } catch (mailErr) {
+        console.warn('[auth] welcome email failed:', mailErr.message);
+      }
     }
 
-    // Generate JWT
     const token = generateToken(newUser);
-
-    // Return response
     res.status(201).json({
       token,
-      user: { ...newUser, password: undefined },
+      user: newUser.toJSON(),
     });
   } catch (error) {
     next(error);
   }
 };
 
-
-// LOGIN USER
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
-
-    const existingUser = findUserByEmail(email);
-
-    if (!existingUser) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    // Compare password
-    const passwordMatches = await bcrypt.compare(
-      password,
-      existingUser.password
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() }).select(
+      '+password'
     );
 
-    if (!passwordMatches) {
-      return res.status(401).json({ error: "Invalid credentials" });
+    if (!existingUser) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
-    const token = generateToken(existingUser);
+    const passwordMatches = await existingUser.comparePassword(password);
+    if (!passwordMatches) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
+    const token = generateToken(existingUser);
     res.json({
       token,
-      user: { ...existingUser, password: undefined },
+      user: existingUser.toJSON(),
     });
   } catch (error) {
     next(error);
   }
 };
 
-
-// USER PROFILE
-export const profile = (req, res) => {
-  const user = { ...req.user };
-  delete user.password;
-  res.json({ user });
+export const profile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ user: user.toJSON() });
+  } catch (error) {
+    next(error);
+  }
 };
