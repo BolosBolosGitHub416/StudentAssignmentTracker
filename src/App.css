@@ -17,7 +17,7 @@ h1 {
 }
 
 h2 {
-  color: #333;
+  color: #393838;
   font-weight: 600;
   margin-bottom: 15px;
 }
@@ -49,6 +49,25 @@ h2 {
 
 .list {
   text-align: left;
+}
+
+.assignment-search {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+  margin: 0 0 16px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.assignment-search input {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
 }
 
 .card {

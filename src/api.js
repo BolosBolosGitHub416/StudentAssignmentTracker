@@ -23,7 +23,13 @@ export async function apiFetch(path, { token, method = 'GET', body } = {}) {
   let data = null;
   try { data = await res.json(); } catch { /* empty body */ }
   if (!res.ok) {
-    const err = new Error(data?.error || data?.message || `Request failed (${res.status})`);
+    const details = data?.details && typeof data.details === 'object'
+      ? Object.entries(data.details)
+        .map(([field, message]) => `${field}: ${message}`)
+        .join('; ')
+      : '';
+    const message = data?.error || data?.message || `Request failed (${res.status})`;
+    const err = new Error(details ? `${message}: ${details}` : message);
     err.status = res.status;
     throw err;
   }

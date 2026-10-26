@@ -95,7 +95,6 @@ assignmentSchema.pre('save', function setStatusFromGrade() {
   if (this.grade !== null && this.grade !== undefined && this.status !== 'completed') {
     this.status = 'completed';
   }
-  next();
 });
 
 export const ASSIGNMENT_STATUS = STATUS;
