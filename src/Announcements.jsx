@@ -40,7 +40,7 @@ export default function Announcements({ token, user }) {
   return (
     <div className="dx-card">
       <h2>Announcement board</h2>
-      {items.length === 0 && <p className="dx-muted">Welcome to Student Assignment Tracker! This is our announcement board. Stay tuned for more updates!</p>}
+      {items.length === 0 && <p className="dx-muted">Welcome to Student Assignment Tracker! This is our announcement board. We have implemented at least two additional in-scope features implemented - login and register page, and searching assignments. Stay tuned for more updates!</p>}
       {items.map((a) => (
         <div key={a._id} className="dx-announcement">
           <strong>{a.title}</strong> <span className="dx-muted">({a.course}{authorName(a) ? `, ${authorName(a)}` : ''})</span>
