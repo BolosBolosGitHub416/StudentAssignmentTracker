@@ -1,3 +1,4 @@
+{/* Import necessary libraries and components */}
 import { useState, useEffect } from "react";
 import "./App.css";
 import Announcements from "./Announcements";
@@ -291,7 +292,7 @@ setRefreshKey((prev) => prev + 1);
             placeholder="e.g. Assignment title or CPAN 324"
           />
         </label>
-
+        {/* Display assignments based on search results */}
         {assignments.length === 0 ? (
           <p>No assignments yet.</p>
         ) : filteredAssignments.length === 0 ? (
@@ -322,8 +323,8 @@ setRefreshKey((prev) => prev + 1);
             );
           })
         )}
-        <About />
-        <footer>
+        <About /> {/* About Component */}
+        <footer> {/* Footer with copyright information */}
       <h4>&copy; 2026 Student Assignment Tracker - By Group 1 - Bolos Bolos, Dustin Nguyen, 
         and Kaynaan Nuur.  All rights reserved.</h4>
     </footer>
