@@ -23,6 +23,8 @@ Currently in a work in progress.
 Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with 'http://localhost:5173'.  The API
 defaults to `http://localhost:8001` for backend; set `VITE_API_URL` if it is hosted elsewhere.
 
+You will now be directed to the login/register authentication page or the home page if successfully signed in or registered.
+
 Students can register or sign in from the login and register account page screen. A successful authentication stores the returned JWT and user profile in browser
 `localStorage` as `token` and `user`. Signing out removes both values. User
 accounts (including bcrypt-hashed passwords) are saved locally in
