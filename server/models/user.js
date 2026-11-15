@@ -1,6 +1,10 @@
 // server/models/user.js
 // indexes: email (unique) role for admin queries
-
+// minlength: [8, 'Password must be at least 8 characters minimum'],
+// This minlength validation above is commented and not used for now. 
+// It is not used because it is causing issues with entering passwords that are less
+// than 8 characters in length.
+// It will be added in the future if possible to implement it just in case.
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -20,7 +24,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters'],
       select: false, // never return password by default
     },
     firstName: {

@@ -199,8 +199,8 @@ setRefreshKey((prev) => prev + 1);
   {/* Filter assignments based on the search term */}
   const searchTerm = assignmentSearch.trim().toLowerCase();
   const filteredAssignments = assignments.filter((assignment) =>
-    [assignment.title, assignment.course]
-      .some((value) => value?.toLowerCase().includes(searchTerm))
+    [assignment.title, assignment.course, assignment.date, assignment.grade, assignment.weight]
+      .some((value) => String(value ?? "").toLowerCase().includes(searchTerm))
   );
 
   if (!token || !user) {
@@ -282,15 +282,16 @@ setRefreshKey((prev) => prev + 1);
       {/* Assignment List */}
       <div className="list">
         <h2>📋 Your Assignments</h2>
-        {/* Assignment Search */}
+        {/* Assignment Search by assignment title, course, date, grade, or weight */}
         <label className="assignment-search">
-          <span>Search by assignment title (e.g. Project Phase 2) or course (e.g. CPAN 324):</span>
+          <span>Search assignments by assignment title (e.g. Project Phase 3), course (e.g. CPAN 324), date (e.g. 2026-11-15),
+            grade (e.g. 85), or weight (e.g. 20):</span>
           <input
             type="search"
             value={assignmentSearch}
             onChange={(event) => setAssignmentSearch(event.target.value)}
-            placeholder="e.g. Assignment title or CPAN 324"
-          />
+            placeholder="e.g. Assignment title, CPAN 324 course, etc."
+          />          
         </label>
         {/* Display assignments based on search results */}
         {assignments.length === 0 ? (
