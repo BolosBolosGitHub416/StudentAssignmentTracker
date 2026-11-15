@@ -86,7 +86,7 @@ export default function NotificationCenter({ token }) {
         <h2 style={{ margin: 0 }}>Notifications{unread > 0 && <span className="dx-badge">{unread}</span>}</h2>
         <div className="dx-row">
           <button className="dx-btn-light" onClick={checkNow}>Check deadlines now</button>
-          <button className="dx-btn-light" onClick={markAll} disabled={unread === 0}>Mark all read</button>
+          <button className="dx-btn-light" onClick={markAll} disabled={unread === 0}>Mark all as read</button>
           <button className="dx-btn-light" onClick={() => setShowSettings((s) => !s)} aria-expanded={showSettings}>Settings</button>
         </div>
       </div>
