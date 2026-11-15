@@ -4,7 +4,7 @@ export default function About() {
       <h2>About Student Assignment Tracker</h2>
       <p>
         Student Assignment Tracker is a web application designed to help students manage their coursework and assignments effectively. It allows users to track assignments, due dates, grades, and more.
-        It provides a user-friendly interface for students to stay organized and keep track of their academic responsibilities.
+        It provides a user-friendly interface for students to chat on the platform, stay organized and keep track of notifications and announcements regarding their academic responsibilities.
       </p>
       <p>
         This application was developed by Group 1 - Bolos Bolos, Dustin Nguyen, and Kaynaan Nuur. Our goal is to provide students with a simple and efficient tool to stay organized and succeed in their academic endeavors.
