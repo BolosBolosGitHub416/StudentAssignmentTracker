@@ -479,3 +479,163 @@ test('student assignments are sorted by due date', async () => {
   ]);
 });
 
+
+test('API rejects an invalid JWT token', async () => {
+  const res = await request(app)
+    .get('/api/assignments')
+    .set('Authorization', 'Bearer invalid-token');
+
+  assert.equal(res.status, 401);
+  assert.equal(res.body.message, 'Invalid or expired token');
+});
+
+test('student cannot access the admin user list', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'securityadmin@example.com',
+      password: 'password123',
+      firstName: 'Security',
+      lastName: 'Tester',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const res = await request(app)
+    .get('/api/users')
+    .set('Authorization', `Bearer ${reg.body.token}`);
+
+  assert.equal(res.status, 403);
+});
+
+test('student cannot create announcements', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'securityannouncement@example.com',
+      password: 'password123',
+      firstName: 'Security',
+      lastName: 'Tester',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const res = await request(app)
+    .post('/api/announcements')
+    .set('Authorization', `Bearer ${reg.body.token}`)
+    .send({
+      title: 'Unauthorized announcement',
+      message: 'Students should not be able to post this.',
+      course: 'General',
+    });
+
+  assert.equal(res.status, 403);
+});
+
+test('student cannot access, edit, or delete another student assignment', async () => {
+  const student1 = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'assignmentowner@example.com',
+      password: 'password123',
+      firstName: 'Assignment',
+      lastName: 'Owner',
+    });
+
+  const student2 = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'assignmentother@example.com',
+      password: 'password123',
+      firstName: 'Other',
+      lastName: 'Student',
+    });
+
+  assert.equal(student1.status, 201);
+  assert.equal(student2.status, 201);
+
+  const created = await request(app)
+    .post('/api/assignments')
+    .set('Authorization', `Bearer ${student1.body.token}`)
+    .send({
+      title: 'Private assignment',
+      course: 'CPAN324',
+      dueDate: '2026-12-01',
+      weight: 25,
+    });
+
+  assert.equal(created.status, 201);
+
+  const id = created.body.id;
+  const otherToken = student2.body.token;
+
+  // Student 2 tries to view Student 1's assignment
+  const viewRes = await request(app)
+    .get(`/api/assignments/${id}`)
+    .set('Authorization', `Bearer ${otherToken}`);
+
+  assert.ok([403, 404].includes(viewRes.status));
+
+  // Student 2 tries to change the assignment
+  const updateRes = await request(app)
+    .put(`/api/assignments/${id}`)
+    .set('Authorization', `Bearer ${otherToken}`)
+    .send({ title: 'Hacked assignment' });
+
+  assert.ok([403, 404].includes(updateRes.status));
+
+  // Student 2 tries to delete the assignment
+  const deleteRes = await request(app)
+    .delete(`/api/assignments/${id}`)
+    .set('Authorization', `Bearer ${otherToken}`);
+
+  assert.ok([403, 404].includes(deleteRes.status));
+
+  // Confirm the original assignment was not changed
+  const original = await request(app)
+    .get(`/api/assignments/${id}`)
+    .set('Authorization', `Bearer ${student1.body.token}`);
+
+  assert.equal(original.status, 200);
+  assert.equal(original.body.title, 'Private assignment');
+});
+
+test('notification settings reject invalid reminder days', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'securityprefs@example.com',
+      password: 'password123',
+      firstName: 'Security',
+      lastName: 'Preferences',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const res = await request(app)
+    .put('/api/notifications/prefs')
+    .set('Authorization', `Bearer ${reg.body.token}`)
+    .send({
+      reminderDaysBefore: 100,
+    });
+
+  assert.equal(res.status, 400);
+  assert.ok(res.body.error);
+});
+
+test('notification settings and deadline checks require login', async () => {
+  const settings = await request(app)
+    .get('/api/notifications/prefs');
+
+  const update = await request(app)
+    .put('/api/notifications/prefs')
+    .send({ reminderDaysBefore: 2 });
+
+  const check = await request(app)
+    .post('/api/notifications/check');
+
+  assert.equal(settings.status, 401);
+  assert.equal(update.status, 401);
+  assert.equal(check.status, 401);
+});
+
