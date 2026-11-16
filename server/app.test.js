@@ -344,3 +344,72 @@ test('registration rejects passwords longer than 72 characters', async () => {
 });
 
 
+test('notification routes require authentication', async () => {
+  const res = await request(app)
+    .get('/api/notifications');
+
+  assert.equal(res.status, 401);
+});
+
+test('registered student can retrieve notifications', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'notifications@example.com',
+      password: 'password123',
+      firstName: 'Notification',
+      lastName: 'Tester',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const res = await request(app)
+    .get('/api/notifications')
+    .set('Authorization', `Bearer ${reg.body.token}`);
+
+  assert.equal(res.status, 200);
+  assert.ok(Array.isArray(res.body.items));
+  assert.equal(res.body.unreadCount, 0);
+});
+
+test('registered student can retrieve announcements', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'announcements@example.com',
+      password: 'password123',
+      firstName: 'Announcement',
+      lastName: 'Tester',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const res = await request(app)
+    .get('/api/announcements')
+    .set('Authorization', `Bearer ${reg.body.token}`);
+
+  assert.equal(res.status, 200);
+  assert.ok(Array.isArray(res.body));
+});
+
+test('registered student can retrieve course chat messages', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'messages@example.com',
+      password: 'password123',
+      firstName: 'Message',
+      lastName: 'Tester',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const res = await request(app)
+    .get('/api/messages?course=CPAN324')
+    .set('Authorization', `Bearer ${reg.body.token}`);
+
+  assert.equal(res.status, 200);
+  assert.ok(Array.isArray(res.body));
+});
+
+
