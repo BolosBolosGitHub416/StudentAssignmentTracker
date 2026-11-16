@@ -84,11 +84,24 @@ const assignmentSchema = new mongoose.Schema(
   }
 );
 
-// Compound indexes used by analytics, priority list, and reminder job
+
+// Compound indexes for faster MongoDB queries
+
+// Analytics, assignment status, and reminders
 assignmentSchema.index({ userId: 1, status: 1, dueDate: 1 });
+
+// Student assignments sorted by deadline
+assignmentSchema.index({ userId: 1, dueDate: 1 });
+
+// Assignments grouped by student and course
 assignmentSchema.index({ userId: 1, course: 1 });
-assignmentSchema.index({ status: 1, dueDate: 1 }); // reminder window scans
+
+// Reminder job deadline queries
+assignmentSchema.index({ status: 1, dueDate: 1 });
+
+// Course-based deadline searches
 assignmentSchema.index({ course: 1, dueDate: -1 });
+
 
 // Keep status consistent with grade when possible
 assignmentSchema.pre('save', function setStatusFromGrade() {
