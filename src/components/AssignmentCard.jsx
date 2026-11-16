@@ -1,8 +1,11 @@
+import ProgressBar from './ProgressBar.jsx';
+
 const AssignmentCard = ({ assignment }) => {
   const colors = {
     CRITICAL: "#e53935",
     HIGH: "#fb8c00",
     MEDIUM: "#1976d2",
+    LOW: "#43a047",
   };
 
   const color = colors[assignment.priority] || "#999";

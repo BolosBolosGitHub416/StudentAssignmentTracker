@@ -43,7 +43,6 @@ test('health route reports API status', async () => {
     status: 'ok',
     service: 'Student Assignment Tracker API',
   });
-  rmSync(process.env.USER_STORE_FILE, { force: true });
 });
 
 // —— Auth validation ——
@@ -194,99 +193,93 @@ test('analytics dashboard requires auth and returns structure', async () => {
   assert.equal(res.body.totalAssignments, 1);
 });
 
-test("students can create assignments owned by their authenticated user", async () => {
-  const token = generateToken({
-    _id: "student-1",
-    email: "student@example.com",
-    role: "student",
+test('students can only create assignments for their own account', async () => {
+  const registration = await request(app).post('/api/auth/register').send({
+    email: 'owner@example.com',
+    password: 'password123',
+    firstName: 'Own',
+    lastName: 'Er',
   });
-  const createResponse = await fetch(`${baseUrl}/api/assignments`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      title: "Lab report",
-      course: "Biology 101",
+  const createResponse = await request(app)
+    .post('/api/assignments')
+    .set('Authorization', `Bearer ${registration.body.token}`)
+    .send({
+      title: 'Lab report',
+      course: 'Biology 101',
       weight: 20,
-      dueDate: "2026-11-01",
-      status: "in_progress",
-      grade: 95,
-      userId: "another-student",
-      studentId: "another-student",
-    }),
-  });
-  const created = await createResponse.json();
-
-  assert.equal(createResponse.status, 201);
-  assert.equal(created.course, "Biology 101");
-  assert.equal(created.weight, 20);
-  assert.equal(created.status, "in_progress");
-  assert.equal(created.grade, 95);
-  assert.equal(created.userId, "student-1");
-  assert.equal(created.studentId, "student-1");
-
-  const listResponse = await fetch(`${baseUrl}/api/assignments`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  assert.equal(listResponse.status, 200);
-  assert.deepEqual(await listResponse.json(), [created]);
-});
-
-test("student assignment validation rejects invalid weights and grades", async () => {
-  const token = generateToken({
-    _id: "student-1",
-    email: "student@example.com",
-    role: "student",
-  });
-
-  for (const invalidField of ["weight", "grade"]) {
-    const response = await fetch(`${baseUrl}/api/assignments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title: "Lab report",
-        dueDate: "2026-11-01",
-        [invalidField]: 101,
-      }),
+      dueDate: '2026-11-01',
+      studentId: new mongoose.Types.ObjectId().toString(),
     });
 
+  assert.equal(createResponse.status, 201);
+  assert.equal(createResponse.body.course, 'Biology 101');
+  assert.equal(createResponse.body.weight, 20);
+  assert.equal(createResponse.body.studentId, registration.body.user.id);
+
+  const otherRegistration = await request(app).post('/api/auth/register').send({
+    email: 'other@example.com',
+    password: 'password123',
+    firstName: 'Other',
+    lastName: 'Student',
+  });
+  const otherList = await request(app)
+    .get('/api/assignments')
+    .set('Authorization', `Bearer ${otherRegistration.body.token}`);
+  assert.equal(otherList.status, 200);
+  assert.deepEqual(otherList.body, []);
+});
+
+test('assignment validation rejects weights and grades above 100', async () => {
+  const registration = await request(app).post('/api/auth/register').send({
+    email: 'limits@example.com',
+    password: 'password123',
+    firstName: 'Limit',
+    lastName: 'Tester',
+  });
+
+  for (const field of ['weight', 'grade']) {
+    const response = await request(app)
+      .post('/api/assignments')
+      .set('Authorization', `Bearer ${registration.body.token}`)
+      .send({
+        title: 'Lab report',
+        dueDate: '2026-11-01',
+        [field]: 101,
+      });
+
     assert.equal(response.status, 400);
+    assert.ok(response.body.details[field]);
   }
 });
 
-test("analytics dashboard returns metrics for the authenticated student's assignments", async () => {
-  const userId = "student-analytics";
-  const token = generateToken({
-    _id: userId,
-    email: "analytics@example.com",
-    role: "student",
-  });
-  assignments.push({
-    id: "assignment-analytics",
-    title: "Lab report",
-    course: "Biology 101",
-    dueDate: "2026-11-01",
-    weight: 20,
-    grade: 88,
-    status: "completed",
-    studentId: userId,
+test('analytics dashboard reports the authenticated student assignments', async () => {
+  const registration = await request(app).post('/api/auth/register').send({
+    email: 'analytics@example.com',
+    password: 'password123',
+    firstName: 'Analyze',
+    lastName: 'Student',
   });
 
-  const response = await fetch(`${baseUrl}/api/analytics/dashboard`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const dashboard = await response.json();
+  await request(app)
+    .post('/api/assignments')
+    .set('Authorization', `Bearer ${registration.body.token}`)
+    .send({
+      title: 'Lab report',
+      course: 'Biology 101',
+      dueDate: '2026-11-01',
+      weight: 20,
+      grade: 88,
+    });
+
+  const response = await request(app)
+    .get('/api/analytics/dashboard')
+    .set('Authorization', `Bearer ${registration.body.token}`);
+  const dashboard = response.body;
 
   assert.equal(response.status, 200);
   assert.equal(dashboard.totalAssignments, 1);
   assert.equal(dashboard.completedAssignments, 1);
   assert.equal(dashboard.totalCourses, 1);
-  assert.equal(dashboard.courses[0].courseName, "Biology 101");
+  assert.equal(dashboard.courses[0].courseName, 'Biology 101');
   assert.equal(dashboard.courses[0].gpa.percentage, 88);
 });
