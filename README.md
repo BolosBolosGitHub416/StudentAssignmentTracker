@@ -37,6 +37,9 @@ The API tests for Student Assignment Tracker cover registration/login, assignmen
 The frontend tests cover grade/priority calculations, API request behavior, and assignment-card rendering.
 
 ## Deployment Plan 
-We will deploy our project using GitHub Pages with GitHub Actions as our source to deploy our website for students to add and track assignments, written in HTML, CSS, and JavaScript on a Vite + React framework.
+We will deploy our project using GitHub Pages with GitHub Actions as our source to deploy our website for students to add and track assignments, written in HTML, CSS, and JavaScript languages on a Vite + React framework.
+
+Our published deployed project website is 
+`https://bolosbolosgithub416.github.io/StudentAssignmentTracker/`
 
 
