@@ -9,9 +9,9 @@ Student Assignment Tracker is an academic management web application that helps 
 
 Currently in a work in progress.
 
-## Login/Registration authentication page and adding and tracking student assignments
+## Installation Guide - Login/Registration authentication page and adding and tracking student assignments
 
-Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with 'http://localhost:5173'.  The API
+Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with `http://localhost:5173`.  The API
 defaults to `http://localhost:8001` for backend; set `VITE_API_URL` if it is hosted elsewhere.
 
 You will now be directed to the login/register authentication page or the home page if successfully signed in or registered.
@@ -25,3 +25,7 @@ Authenticated students can create assignments through `POST /api/assignments`.
 The API for Student Assigent Tracker stores the title, course, weight, due date, status, and grade, and
 associates the assignment with the student ID from the verified JWT rather than
 trusting a client-supplied owner ID. Assignment data is currently stored in the MongoDB database for the back-end. 
+
+
+## Deployment Plan 
+We will deploy our project in either GitHub Pages or Vercel.
