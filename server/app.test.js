@@ -300,3 +300,47 @@ test('registration prevents users from becoming admins', async () => {
   assert.equal(res.body.user.role, 'student');
 });
 
+
+test('registration accepts a one-character password', async () => {
+  const res = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'shortpassword@example.com',
+      password: 'a',
+      firstName: 'Short',
+      lastName: 'Password',
+    });
+
+  assert.equal(res.status, 201);
+  assert.equal(res.body.user.email, 'shortpassword@example.com');
+});
+
+test('registration rejects an empty password', async () => {
+  const res = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'emptypassword@example.com',
+      password: '',
+      firstName: 'Empty',
+      lastName: 'Password',
+    });
+
+  assert.equal(res.status, 400);
+  assert.ok(res.body.details.password);
+});
+
+test('registration rejects passwords longer than 72 characters', async () => {
+  const res = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'longpassword@example.com',
+      password: 'a'.repeat(73),
+      firstName: 'Long',
+      lastName: 'Password',
+    });
+
+  assert.equal(res.status, 400);
+  assert.ok(res.body.details.password);
+});
+
+
