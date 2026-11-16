@@ -11,6 +11,10 @@ import userRouter from "./routers/users.js";
 import analyticsRouter from "./routers/analytics.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import logger from "./middleware/logger.js";
+import notificationRouter from "./routers/notifications.js";
+import announcementRouter from "./routers/announcements.js";
+import messageRouter from "./routers/messages.js";
+
 
 dotenv.config({ path: fileURLToPath(new URL("./.env", import.meta.url)) });
 
@@ -41,14 +45,19 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", service: "Student Assignment Tracker API" });
 });
 
+
 app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/assignments", assignmentRouter);
 app.use("/api/users", userRouter);
 app.use("/api/analytics", analyticsRouter);
 
-// Kaynaan's routes (announcements / notifications / messages) can be added later
+// Notifications, announcements, and course chat
+app.use("/api/notifications", notificationRouter);
+app.use("/api/announcements", announcementRouter);
+app.use("/api/messages", messageRouter);
 
 app.use(notFound);
 app.use(errorHandler);
+
 
 export default app;
