@@ -283,3 +283,20 @@ test('analytics dashboard reports the authenticated student assignments', async 
   assert.equal(dashboard.courses[0].courseName, 'Biology 101');
   assert.equal(dashboard.courses[0].gpa.percentage, 88);
 });
+
+
+test('registration prevents users from becoming admins', async () => {
+  const res = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'securitytest@example.com',
+      password: 'password123',
+      firstName: 'Security',
+      lastName: 'Test',
+      role: 'admin',
+    });
+
+  assert.equal(res.status, 201);
+  assert.equal(res.body.user.role, 'student');
+});
+
