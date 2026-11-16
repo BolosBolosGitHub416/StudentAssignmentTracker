@@ -9,21 +9,14 @@ Student Assignment Tracker is an academic management web application that helps 
 
 Currently in a work in progress.
 
-## Installation Guide - Login/Registration authentication page and adding and tracking student assignments
+## Installation Guide 
+
+#### Login/Registration authentication page and adding and tracking student assignments
 
 Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with `http://localhost:5173`.  The API
 defaults to `http://localhost:8001` for backend; set `VITE_API_URL` if it is hosted elsewhere.
 
 You will now be directed to the login/register authentication page or the home page if successfully signed in or registered.
-
-#### Testing Vitest and Express API
-
-Run `npm test` to execute both test layers - Vitest and . `npm run test:unit` runs Vitest
-unit and React component tests in jsdom; `npm run test:integration` runs the
-Express API tests against an in-memory MongoDB, without requiring a local
-database. The API tests cover registration/login, assignment validation and
-ownership, and dashboard responses. The frontend tests cover grade/priority
-calculations, API request behavior, and assignment-card rendering.
 
 Students as users can register or sign in from the login and register account page screen. A successful authentication stores the returned JWT and user profile in browser
 `localStorage` as `token` and `user`. Signing out removes both values. User
@@ -35,6 +28,17 @@ The API for Student Assigent Tracker stores the title, course, weight, due date,
 associates the assignment with the student ID from the verified JWT rather than
 trusting a client-supplied owner ID. Assignment data is currently stored in the MongoDB database for the back-end. 
 
+#### Testing Plan 
 
-#### Deployment Plan 
-We will deploy our project in either GitHub Pages or Vercel.
+Run `npm test` to execute both test layers - 1. Vitest and React component tests and 2. Express API tests.
+Run `npm run test:unit` for Vitest unit and React component tests in jsdom; Run `npm run test:integration` for Express API tests against an in-memory MongoDB, without requiring a local database. 
+The API tests cover registration/login, assignment validation and
+ownership, and dashboard responses. The frontend tests cover grade/priority
+calculations, API request behavior, and assignment-card rendering.
+
+## Deployment Plan 
+We will deploy our project using GitHub Pages:
+Our deployed project site is: 
+`https://bolosbolosgithub416.github.io/StudentAssignmentTracker/`
+
+
