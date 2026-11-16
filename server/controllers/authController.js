@@ -7,7 +7,7 @@ import sendEmail from '../utils/sendEmail.js';
 
 export const register = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, role = 'student' } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
     const existing = await User.findOne({ email: email.toLowerCase().trim() });
     if (existing) {
@@ -19,7 +19,7 @@ export const register = async (req, res, next) => {
       password,
       firstName,
       lastName,
-      role,
+      role: 'student',
     });
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
