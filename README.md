@@ -25,3 +25,6 @@ Authenticated students can create assignments through `POST /api/assignments`.
 The API for Student Assigent Tracker stores the title, course, weight, due date, status, and grade, and
 associates the assignment with the student ID from the verified JWT rather than
 trusting a client-supplied owner ID. Assignment data is currently stored in the MongoDB database for the back-end. 
+
+## Deployment Plan 
+We will deploy our project using GitHub Pages with GitHub Actions as our source to deploy our website for students to add and track assignments, written in HTML, CSS, and JavaScript on a Vite + React framework.
