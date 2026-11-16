@@ -31,10 +31,10 @@ trusting a client-supplied owner ID. Assignment data is currently stored in the 
 #### Testing Plan 
 
 Run `npm test` to execute both test layers - 1. Vitest and React component tests and 2. Express API tests.
-Run `npm run test:unit` for Vitest unit and React component tests in jsdom; Run `npm run test:integration` for Express API tests against an in-memory MongoDB, without requiring a local database. 
-The API tests cover registration/login, assignment validation and
-ownership, and dashboard responses. The frontend tests cover grade/priority
-calculations, API request behavior, and assignment-card rendering.
+Run `npm run test:unit` for Vitest unit and React component tests in jsdom; 
+Run `npm run test:integration` for Express API tests against an in-memory MongoDB, without requiring a local database. 
+The API tests for Student Assignment Tracker cover registration/login, assignment validation and ownership, and dashboard responses.
+The frontend tests cover grade/priority calculations, API request behavior, and assignment-card rendering.
 
 ## Deployment Plan 
 We will deploy our project using GitHub Pages:
