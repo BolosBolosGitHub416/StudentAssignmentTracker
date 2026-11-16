@@ -11,6 +11,9 @@ import app from './app.js';
 import { connectDB, disconnectDB } from './utils/db.js';
 import './utils/models.js';
 
+import Assignment from './models/assignment.js';
+
+
 process.env.JWT_SECRET = 'test-only-secret-for-unit-tests';
 process.env.NODE_ENV = 'test';
 
@@ -412,4 +415,67 @@ test('registered student can retrieve course chat messages', async () => {
   assert.ok(Array.isArray(res.body));
 });
 
+
+test('MongoDB has an index for student deadlines', async () => {
+  await Assignment.init();
+
+  const indexes = await Assignment.collection.indexes();
+
+  const deadlineIndex = indexes.find(
+    (index) =>
+      index.key.userId === 1 &&
+      index.key.dueDate === 1 &&
+      Object.keys(index.key).length === 2
+  );
+
+  assert.ok(deadlineIndex);
+});
+
+test('student assignments are sorted by due date', async () => {
+  const reg = await request(app)
+    .post('/api/auth/register')
+    .send({
+      email: 'sorting@example.com',
+      password: 'password123',
+      firstName: 'Sorting',
+      lastName: 'Tester',
+    });
+
+  assert.equal(reg.status, 201);
+
+  const token = reg.body.token;
+
+  const assignments = [
+    { title: 'Assignment 3', dueDate: '2026-12-20' },
+    { title: 'Assignment 1', dueDate: '2026-12-01' },
+    { title: 'Assignment 2', dueDate: '2026-12-10' },
+  ];
+
+  for (const assignment of assignments) {
+    const res = await request(app)
+      .post('/api/assignments')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        ...assignment,
+        course: 'CPAN324',
+        weight: 20,
+      });
+
+    assert.equal(res.status, 201);
+  }
+
+  const res = await request(app)
+    .get('/api/assignments')
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+
+  const titles = res.body.map((a) => a.title);
+
+  assert.deepEqual(titles, [
+    'Assignment 1',
+    'Assignment 2',
+    'Assignment 3',
+  ]);
+});
 
