@@ -9,11 +9,9 @@ Student Assignment Tracker is an academic management web application that helps 
 
 Currently in a work in progress.
 
-## Installation Guide 
+## Login/Registration authentication page and adding and tracking student assignments
 
-#### Login/Registration authentication page and adding and tracking student assignments
-
-Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with `http://localhost:5173`.  The API
+Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with 'http://localhost:5173'.  The API
 defaults to `http://localhost:8001` for backend; set `VITE_API_URL` if it is hosted elsewhere.
 
 You will now be directed to the login/register authentication page or the home page if successfully signed in or registered.
@@ -27,19 +25,3 @@ Authenticated students can create assignments through `POST /api/assignments`.
 The API for Student Assigent Tracker stores the title, course, weight, due date, status, and grade, and
 associates the assignment with the student ID from the verified JWT rather than
 trusting a client-supplied owner ID. Assignment data is currently stored in the MongoDB database for the back-end. 
-
-#### Testing Plan 
-
-Run `npm test` to execute both test layers - 1. Vitest and React component tests and 2. Express API tests.
-Run `npm run test:unit` for Vitest unit and React component tests in jsdom; 
-Run `npm run test:integration` for Express API tests against an in-memory MongoDB, without requiring a local database. 
-The API tests for Student Assignment Tracker cover registration/login, assignment validation and ownership, and dashboard responses.
-The frontend tests cover grade/priority calculations, API request behavior, and assignment-card rendering.
-
-## Deployment Plan 
-We will deploy our project using GitHub Pages with GitHub Actions as our source to deploy our website for students to add and track assignments, written in HTML, CSS, and JavaScript languages on a Vite + React framework.
-
-Our published deployed project website is 
-`https://bolosbolosgithub416.github.io/StudentAssignmentTracker/`
-
-
