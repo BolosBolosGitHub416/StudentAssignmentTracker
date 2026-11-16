@@ -7,8 +7,6 @@ This project expands on where it left off from CPAN 314 - Project Development I.
 
 Student Assignment Tracker is an academic management web application that helps students manage coursework and improve on their academic grades. Students struggle to balance deadlines, especially with weights and grades spanning across many courses, and most advisors have little to no visibility into who is falling behind. This system lets students add and track assignments for their courses, adds deadline prioritization, grade prediction, GPA tracking, course messaging, notifications, and improves outcomes. 
 
-Currently in a work in progress.
-
 ## Login/Registration authentication page and adding and tracking student assignments
 
 Run the frontend with `npm run dev` and the API with `npm run server`. Vite + React frontend will show a link for frontend work with 'http://localhost:5173'.  The API
