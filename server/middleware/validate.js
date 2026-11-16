@@ -34,9 +34,9 @@ export function validate(schema) {
 export const registerSchema = {
   email: (v) => (!isEmail(v) ? 'Valid email is required' : null),
   password: (v) =>
-    typeof v !== 'string' || v.length < 8
-      ? 'Password must be at least 8 characters'
-      : null,
+  typeof v !== 'string' || v.length < 1 || v.length > 72
+    ? 'Password must be between 1 and 72 characters'
+    : null,
   firstName: (v) => (!isNonEmptyString(v, 50) ? 'First name is required (max 50)' : null),
   lastName: (v) => (!isNonEmptyString(v, 50) ? 'Last name is required (max 50)' : null),
   role: (v) => {
